@@ -1,0 +1,19 @@
+REPOSITORY                                         TAG                             IMAGE ID            CREATED             SIZE
+registry                                           2                               c6c14b3960bd        5 months ago        33.28 MB
+sameersbn/apt-cacher-ng                            latest                          450d3bcf77cf        4 months ago        199.4 MB
+sameersbn/squid                                    latest                          83087550cf61        3 months ago        214 MB
+nginx                                              latest                          4efb2fcdb1ab        4 months ago        183.4 MB
+sonatype/nexus3                                    latest                          71cd1bebf84e        10 weeks ago        463.4 MB
+jenkins                                            latest                          ff6f0851ef57        6 weeks ago         714.1 MB
+odoo                                               latest
+postgres                                           latest                          5ff2afd2f5c3        5 months ago        265.9 MB
+airdock/oracle-jdk                                 latest
+openjdk                                            8
+tomcat                                             8.5
+tomee                                              8-jdk-7.0.1-plume
+richarvey/nginx-php-fpm                            latest
+mysql                                              latest
+redmine                                            latest
+python                                             latest
+ptyhon                                             2.7.13
+go                                                 latest
