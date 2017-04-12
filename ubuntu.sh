@@ -14,16 +14,20 @@
 #9. rbenv,pyenv,nvm,gvm,sdk
 
 echo "Hello World!"
-echo progress-bar >> ~/.curlrc
-PATH="/usr/local/heroku/bin:/home/max/bin/roo/bin:$PATH"
-export JAVA_HOME=/usr/lib/jvm/latest
-export GOROOT_BOOTSTRAP=/home/max/bin/go1.4
 MAX_HOME="/home/max"
-MAX_SH="$MAX_HOME/.max"
+MAX_SHELL="/work/max"
+
+export JAVA_HOME=/usr/lib/jvm/latest
+export GOROOT_BOOTSTRAP=$MAX_HOME/bin/go1.4
+export PATH=$PATH:$JAVA_HOME/bin
+
 LOGINPASSWD="mmmm"
 
 LOG_FILE="$MAX_HOME/install_log"
 
+
+alias supass="echo $LOGINPASSWD | sudo -S "
+echo progress-bar >> $MAX_HOME/.curlrc
 ########################################################################
 #colors for echo
 ########################################################################
@@ -140,8 +144,8 @@ END_HEREDOC
 ########################################################################
 
 
-#if [[ ! -d ~/.oobash ]]; then
-#	git clone https://github.com/niieani/bash-oo-framework.git ~/.oobash
+#if [[ ! -d $MAX_HOME/.oobash ]]; then
+#	git clone https://github.com/niieani/bash-oo-framework.git $MAX_HOME/.oobash
 #fi 	
 #source "/home/max/.oobash/lib/oo-bootstrap.sh"
 
@@ -152,8 +156,8 @@ END_HEREDOC
 #echo "This is both the log and the console" | tee /dev/fd/3
 
 devpkg (){
-	echo $LOGINPASSWD | sudo -S apt-get install -y nano git geany thunderbird  zsh fish curl aria2 augeas-tools libaugeas-dev subversion mercurial expect ppa-purge
-	echo $LOGINPASSWD | sudo -S apt-get install -y build-essential  libssl-dev libreadline-dev libzzip-dev bison
+	supass apt-get install -y nano git geany thunderbird  zsh fish curl aria2 augeas-tools libaugeas-dev subversion mercurial expect ppa-purge
+	supass apt-get install -y build-essential 
 	#groupinstall "Development Tools" "Development Libraries"
 }
 
@@ -171,90 +175,91 @@ itwork(){
 	WORK_DEV=$1
 	JOB_DEV=$2
 	if [[ ! -d /work ]]; then
-	  echo $LOGINPASSWD | sudo -S mkdir /work
+	  supass mkdir /work
 	fi
 	
 	if [[ ! -d /job ]]; then
-	  echo $LOGINPASSWD | sudo -S mkdir /job
+	  supass mkdir /job
 	fi
 	
-    echo $LOGINPASSWD | sudo -S chown -R max:max /work /job
-    workuuid=$(echo $LOGINPASSWD | sudo -S blkid /dev/$WORK_DEV | awk  '{print $3}')
-    jobuuid=$(sudo blkid /dev/$JOB_DEV | awk  '{print $3}')
+    supass chown -R max:max /work /job
+    workuuid=$(supass blkid /dev/$WORK_DEV | awk  '{print $3}')
+    jobuuid=$(supass blkid /dev/$JOB_DEV | awk  '{print $3}')
     echo "mount $WORK_DEV for $workuuid"
-    sudo mount $workuuid /work
+    supass mount $workuuid /work
     echo "mount $JOB_DEV for $jobuuid"
-    sudo mount $jobuuid /job
+    supass mount $jobuuid /job
     
     echo "add  /work /job to /etc/fstab"
-    sudo augtool <<-EOF
-set /files/etc/fstab/11/spec $workuuid
-set /files/etc/fstab/11/file /work
-set /files/etc/fstab/11/vfstype ext4
-set /files/etc/fstab/11/opt defaults
-set /files/etc/fstab/11/dump 1
-set /files/etc/fstab/11/passno 1
+    supass augtool <<-EOF
+set /files/etc/fstab/100/spec $workuuid
+set /files/etc/fstab/100/file /work
+set /files/etc/fstab/100/vfstype ext4
+set /files/etc/fstab/100/opt defaults
+set /files/etc/fstab/100/dump 1
+set /files/etc/fstab/100/passno 1
 save
 quit
 EOF
-     sudo augtool <<-EOF
-set /files/etc/fstab/11/spec $jobuuid
-set /files/etc/fstab/11/file /job
-set /files/etc/fstab/11/vfstype ext4
-set /files/etc/fstab/11/opt defaults
-set /files/etc/fstab/11/dump 1
-set /files/etc/fstab/11/passno 1
+     supass augtool <<-EOF
+set /files/etc/fstab/101/spec $jobuuid
+set /files/etc/fstab/101/file /job
+set /files/etc/fstab/101/vfstype ext4
+set /files/etc/fstab/101/opt defaults
+set /files/etc/fstab/101/dump 1
+set /files/etc/fstab/101/passno 1
 save
 quit
 EOF
+  supass mount -a
 
-sudo augtool <<-EOF
-set /files/etc/hosts/11/ipaddr 127.0.0.1
-set /files/etc/hosts/11/canonical proxy.tdocker.com
-save
-quit
-EOF
-
-sudo augtool <<-EOF
-set /files/etc/hosts/11/ipaddr 127.0.0.1
-set /files/etc/hosts/11/canonical repo.tdocker.com
-save
-quit
-EOF
 }
 
-ithost(){
-	
+function ithost {
+    echo "change hosts from here"
+    supass augtool <<-EOF
+set /files/etc/hosts/201/ipaddr 127.0.0.1
+set /files/etc/hosts/201/canonical proxy.tdocker.com
+save
+quit
+EOF
+
+supass augtool <<-EOF
+set /files/etc/hosts/202/ipaddr 127.0.0.1
+set /files/etc/hosts/202/canonical repo.tdocker.com
+save
+quit
+EOF
 }
 
 _install_zsh(){
-	if [[ -d ~/.oh-my-zsh ]]; then
+	if [[ -d $MAX_HOME/.oh-my-zsh ]]; then
 	  echo oh-my-zsh exist. Remove it firstly!
-	  tar zcf ~/oh-my-zsh-backup_$(date +%F-%kh%M).tar.gz -C  $MAX_HOME/.oh-my-zsh
-	  rm -rf ~/.oh-my-zsh
+	  tar zcf $MAX_HOME/oh-my-zsh-backup_$(date +%F-%kh%M).tar.gz -C  $MAX_HOME/.oh-my-zsh
+	  rm -rf $MAX_HOME/.oh-my-zsh
 	fi 
 	
 	git clone git://github.com/robbyrussell/oh-my-zsh.git $MAX_HOME/.oh-my-zsh
 	 
-	if [[ -a  ~/.zshrc ]]; then
+	if [[ -a  $MAX_HOME/.zshrc ]]; then
      echo zshrc: $chrome_file exist. Remove it firstly!
-     mv ~/.zshrc ~/.zshrc.$(date +%F-%kh%M).ori
+     mv $MAX_HOME/.zshrc $MAX_HOME/.zshrc.$(date +%F-%kh%M).ori
     fi
 	
-	cp ~/.oh-my-zsh/templates/zshrc.zsh-template ~/.zshrc
-	sed -i  -e 's/^ZSH_THEME=.*/ZSH_THEME="candy"/' -e 's/^plugins=.*/plugins=(rails git ruby Composer coffee cpanm docker gem github lein mercurial node npm perl pip vagrant)/' ~/.zshrc
-	echo 'source ~/.max/max.sh' >> ~/.zshrc
+	cp $MAX_HOME/.oh-my-zsh/templates/zshrc.zsh-template $MAX_HOME/.zshrc
+	sed -i  -e 's/^ZSH_THEME=.*/ZSH_THEME="candy"/' -e 's/^plugins=.*/plugins=(rails git ruby Composer coffee cpanm docker gem github lein mercurial node npm perl pip vagrant)/' $MAX_HOME/.zshrc
+	echo 'source /work/max/ubuntu.sh' >> $MAX_HOME/.zshrc
 }
 
 _install_fish(){
-	if [[ -d ~/.oh-my-fish ]]; then
+	if [[ -d $MAX_HOME/.oh-my-fish ]]; then
 	  echo oh-my-fish exist. Remove it firstly!
-	  tar zcf ~/oh-my-fish-backup_$(date +%F-%kh%M).tar.gz -C ~/.oh-my-fish
-	  rm -rf ~/.oh-my-fish
+	  tar zcf $MAX_HOME/oh-my-fish-backup_$(date +%F-%kh%M).tar.gz -C $MAX_HOME/.oh-my-fish
+	  rm -rf $MAX_HOME/.oh-my-fish
 	fi 
 	
-	git clone https://github.com/oh-my-fish/oh-my-fish ~/.oh-my-fish
-	cd ~/.oh-my-fish
+	git clone https://github.com/oh-my-fish/oh-my-fish $MAX_HOME/.oh-my-fish
+	cd $MAX_HOME/.oh-my-fish
 	bin/install --offline
 	cd ~
 }
@@ -277,16 +282,16 @@ itshtheme () {
 }
 
 itlang(){
-	#sudo apt-get install -y ibus-pinyin
+	#supass apt-get install -y ibus-pinyin
 	#ibus restart
 	
-	#sudo add-apt-repository ppa:fcitx-team/nightly
-	#sudo apt-get update
+	#supass add-apt-repository ppa:fcitx-team/nightly
+	#supass apt-get update
 	
 	
-	sudo apt-get install fcitx fcitx-pinyin fcitx-sunpinyin fcitx-googlepinyin fcitx-anthy fcitx-mozc
+	supass apt-get install fcitx fcitx-pinyin fcitx-sunpinyin fcitx-googlepinyin fcitx-anthy fcitx-mozc
 	wget http://http.us.debian.org/debian/pool/main/o/open-gram/sunpinyin-data_0.1.22+20131212-1_amd64.deb -O /tmp/sunpinyin-data_0.1.22+20131212-1_amd64.deb
-	sudo dpkg -i  /tmp/sunpinyin-data_0.1.22+20131212-1_amd64.deb
+	supass dpkg -i  /tmp/sunpinyin-data_0.1.22+20131212-1_amd64.deb
     im-config
 }
 
@@ -297,9 +302,9 @@ itbin(){
 	  ACT="fix"
 	fi	
 	
-	INSTALL_LOG="/home/max/bin/.installed"
+	INSTALL_LOG="$MAX_HOME/bin/.installed"
 	
-	[ -d "/home/max/bin" ] ||  mkdir /home/max/bin
+	[ -d "$MAX_HOME/bin" ] ||  mkdir $MAX_HOME/bin
 	[ -f "$INSTALL_LOG" ] ||  touch $INSTALL_LOG	 
 	
 	declare -A hashmap
@@ -315,13 +320,13 @@ itbin(){
 	   EXCUTOR=$it
        GETURL=${hashmap[$it]}
        if [ "$ACT" = "new" ] || ( [ "$ACT" = "fix" ] && ! grep -q $EXCUTOR $INSTALL_LOG ) ; then
-         if [ "$ACT" = "new" ] && [ -e "/home/max/bin/$EXCUTOR" ] ; then
-             rm -rf "/home/max/bin/$EXCUTOR"
+         if [ "$ACT" = "new" ] && [ -e "$MAX_HOME/bin/$EXCUTOR" ] ; then
+             rm -rf "$MAX_HOME/bin/$EXCUTOR"
          fi
          
 	     echo "Installing $EXCUTOR..."
-	     wget $GETURL -O ~/bin/$EXCUTOR
-         chmod +x  ~/bin/$EXCUTOR
+	     wget $GETURL -O $MAX_HOME/bin/$EXCUTOR
+         chmod +x  $MAX_HOME/bin/$EXCUTOR
 	     echo "$EXCUTOR"  >> $INSTALL_LOG
 	   else
 	     echo "Installed $EXCUTOR" 
@@ -330,12 +335,12 @@ itbin(){
 
     
     wget https://releases.hashicorp.com/packer/0.12.2/packer_0.12.2_linux_amd64.zip -O /tmp/packer_0.12.2_linux_amd64.zip
-    cd  /tmp && unzip packer_0.12.2_linux_amd64.zip && mv packer ~/bin/
-    chmod +x  ~/bin/packer
+    cd  /tmp && unzip packer_0.12.2_linux_amd64.zip && mv packer $MAX_HOME/bin/
+    chmod +x  $MAX_HOME/bin/packer
     
     wget http://www.rarlab.com/rar/rarlinux-5.4.0.tar.gz -O /tmp/rarlinux-5.4.0.tar.gz
-    cd /tmp && tar xvzf rarlinux-5.4.0.tar.gz  && mv rar ~/bin/
-    chmod -R ~/bin/rar/
+    cd /tmp && tar xvzf rarlinux-5.4.0.tar.gz  && mv rar $MAX_HOME/bin/
+    chmod -R $MAX_HOME/bin/rar/
     
     wget https://github.com/containers/build/releases/download/v0.4.0/acbuild-v0.4.0.tar.gz -O  /tmp/acbuild-v0.4.0.tar.gz
     cd /tmp && tar xvzf acbuild-v0.4.0.tar.gz 
@@ -355,24 +360,24 @@ itjava () {
 	fi
 	
 	jdk_version=$1
-	sudo add-apt-repository ppa:webupd8team/java
-	#sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys C2518248EEA14886
-    sudo apt-get -y  update
-    sudo apt-get -y  install oracle-java${jdk_version}-installer
-    sudo ln -s /usr/lib/jvm/java-8-oracle /usr/lib/jvm/latest
+	supass add-apt-repository ppa:webupd8team/java
+	#supass apt-key adv --keyserver keyserver.ubuntu.com --recv-keys C2518248EEA14886
+    supass apt-get -y  update
+    supass apt-get -y  install oracle-java${jdk_version}-installer
+    supass ln -s /usr/lib/jvm/java-8-oracle /usr/lib/jvm/latest
 }
  
 itchrome(){
    chrome_file="/etc/apt/sources.list.d/google-chrome.list"
    if [[ -a  $chrome_file ]]; then
      echo File: $chrome_file exist. Remove it firstly!
-     sudo rm -f $chrome_file
+     supass rm -f $chrome_file
    fi
    
-   sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
-   wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add - 
-   sudo apt-get -y update 
-   sudo apt-get -y install google-chrome-stable
+   supass sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
+   wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | supass apt-key add - 
+   supass apt-get -y update 
+   supass apt-get -y install google-chrome-stable
 }
 
 #jenv for java (http://www.jenv.be/)
@@ -393,14 +398,14 @@ itrbenv(){
 	   fi	   
 	fi
 	
-	if [[ -d ~/.rbenv ]]; then
+	if [[ -d $MAX_HOME/.rbenv ]]; then
 	  echo rbenv exist. Remove it firstly!
-	  tar zcf ~/rbenv-backup_$(date +%F-%kh%M).tar.gz -C $MAX_HOME/ .rbenv
-	  rm -rf ~/.rbenv
+	  tar zcf $MAX_HOME/rbenv-backup_$(date +%F-%kh%M).tar.gz -C $MAX_HOME/ .rbenv
+	  rm -rf $MAX_HOME/.rbenv
 	fi 
 	
-	git clone https://github.com/rbenv/rbenv.git ~/.rbenv
-	git clone https://github.com/rbenv/ruby-build.git ~/.rbenv/plugins/ruby-build
+	git clone https://github.com/rbenv/rbenv.git $MAX_HOME/.rbenv
+	git clone https://github.com/rbenv/ruby-build.git $MAX_HOME/.rbenv/plugins/ruby-build
 	
 	if [ ! -z  $ruby_version ]; then
 	   ldrbenv
@@ -411,10 +416,10 @@ itrbenv(){
 }
 
 itrvm(){	
-	if [[ -d ~/.rvm ]]; then
+	if [[ -d $MAX_HOME/.rvm ]]; then
 	  echo rvm exist. Remove it firstly!
-	  #tar zcvf ~/rvm-backup_$(date +%F-%kh%M).tar.gz -C ~/ .rvm
-	  rm -rf ~/.rvm
+	  #tar zcvf $MAX_HOME/rvm-backup_$(date +%F-%kh%M).tar.gz -C $MAX_HOME/ .rvm
+	  rm -rf $MAX_HOME/.rvm
 	fi 	
 	#gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3
 	curl -SL https://rvm.io/mpapis.asc | gpg2 --import -
@@ -447,14 +452,14 @@ itsdk(){
 	fi
     
     echo "Installing new sdkman..............."
-    if [[ -d ~/.sdkman ]]; then
+    if [[ -d $MAX_HOME/.sdkman ]]; then
 	  echo sdkman exist. Remove it firstly!
-	  tar zcvf ~/sdkman-backup_$(date +%F-%kh%M).tar.gz -C $MAX_HOME/ .sdkman
-	  rm -rf ~/.sdkman
+	  tar zcvf $MAX_HOME/sdkman-backup_$(date +%F-%kh%M).tar.gz -C $MAX_HOME/ .sdkman
+	  rm -rf $MAX_HOME/.sdkman
 	fi 
 	curl -s "https://get.sdkman.io" | bash
-	sed -i "s/sdkman_disable_gvm_alias=false/sdkman_disable_gvm_alias=true/" ~/.sdkman/etc/config
-	sed -i '/sdkman/d' ~/.zshrc
+	sed -i "s/sdkman_disable_gvm_alias=false/sdkman_disable_gvm_alias=true/" $MAX_HOME/.sdkman/etc/config
+	sed -i '/sdkman/d' $MAX_HOME/.zshrc
 	sdk version
 	_itsdk_fix
 }
@@ -477,10 +482,10 @@ itnvm(){
 	
 	
 	
-    if [[ -d ~/.nvm ]]; then
+    if [[ -d $MAX_HOME/.nvm ]]; then
 	  echo "nvm exist. Remove it firstly!"
-	  #tar zcvf ~/nvm-backup_$(date +%F-%kh%M).tar.gz -C ~/ .nvm
-	  rm -rf ~/.nvm
+	  #tar zcvf $MAX_HOME/nvm-backup_$(date +%F-%kh%M).tar.gz -C $MAX_HOME/ .nvm
+	  rm -rf $MAX_HOME/.nvm
 	fi 
     export NVM_DIR="$HOME/.nvm" && (
      git clone https://github.com/creationix/nvm.git "$NVM_DIR"
@@ -509,12 +514,13 @@ upnvm(){
 
 #gvm for golang
 itgvm(){
-  if [[ -d ~/.gvm ]]; then
+  if [[ -d $MAX_HOME/.gvm ]]; then
 	  echo oh-my-fish exist. Remove it firstly!
-	  tar zcf ~/gvm-backup_$(date +%F-%kh%M).tar.gz -C ~/.gvm
-	  rm -rf ~/.gvm
+	  tar zcf $MAX_HOME/gvm-backup_$(date +%F-%kh%M).tar.gz -C $MAX_HOME/.gvm
+	  rm -rf $MAX_HOME/.gvm
   fi 
 	
+  supass apt install -y bison
   bash < <(curl -s -S -L https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer)	
 }
 
@@ -522,9 +528,9 @@ itgvm(){
 _itperl_fix(){
   #o conf  urllist unshift http://mirrors.aliyun.com/CPAN/
   #o conf commit
-  echo $LOGINPASSWD |  sudo -S  perl -MCPAN -e 'install App::cpanminus'
-  echo $LOGINPASSWD |  sudo -S  cpanm  Capture::Tiny 
-  echo $LOGINPASSWD |  sudo -S  cpanm Dancer2  Catalyst::Devel Mojolicious
+  supass  perl -MCPAN -e 'install App::cpanminus'
+  supass  cpanm  Capture::Tiny 
+  supass  cpanm Dancer2  Catalyst::Devel Mojolicious
 }
 
 
@@ -540,9 +546,9 @@ itperl(){
 #rakudobrew for perl 6
 
 itvala(){
-   sudo add-apt-repository ppa:vala-team
-   sudo apt-get update
-   sudo apt-get install val	
+   supass add-apt-repository ppa:vala-team
+   supass apt-get update
+   supass apt-get install val	
 }
 
 #docker and pull docker images
@@ -555,9 +561,9 @@ _itdocker_fix(){
 	
 	images_file=""
 	if [ "$action" = "first" ]; then
-	   images_file="$MAX_HOME/.max/docker_images_first"
+	   images_file="$MAX_SHELL/docker_images_first"
 	elif [ "$action" = "all" ]; then
-	   images_file="$MAX_HOME/.max/docker_images"
+	   images_file="$MAX_SHELL/docker_images"
 	fi
 	
 	if [ ! -z  $images_file ]; then
@@ -569,7 +575,7 @@ _itdocker_fix(){
           fi
           tag=`echo $line | awk -F ' ' '{print $2}'`
       
-          echo $LOGINPASSWD | sudo -S docker images | grep "$name.*$tag" ||  sudo docker pull $name:$tag         
+          supass docker images | grep "$name.*$tag" ||  supass docker pull $name:$tag         
       
           #sed -e "s/\__FULLNAME\__:/\ $n $l :/g;s/\__Project__/\ $p /g" Reminder.email > sendnow.txt
        done < $images_file
@@ -586,28 +592,28 @@ itdocker(){
 	fi
 	
 	echo "\e[1;31m  Installing new docker ........................  \e[0m"
-	echo $LOGINPASSWD |  sudo -S apt-get update
-    echo $LOGINPASSWD | sudo -S apt-get install -y --no-install-recommends  linux-image-extra-$(uname -r)  linux-image-extra-virtual
-    echo $LOGINPASSWD |  sudo -S apt-get install -y --no-install-recommends \
+	supass  apt-get update
+    supass apt-get install -y --no-install-recommends  linux-image-extra-$(uname -r)  linux-image-extra-virtual
+    supass apt-get install -y --no-install-recommends \
     apt-transport-https \
     ca-certificates \
     curl \
     software-properties-common
     
-    curl -fsSL https://apt.dockerproject.org/gpg | sudo apt-key add -   
+    curl -fsSL https://apt.dockerproject.org/gpg | supass apt-key add -   
     apt-key fingerprint 58118E89F3A912897C070ADBF76221572C52609D
-    echo $LOGINPASSWD | sudo -S add-apt-repository \
+    supass add-apt-repository \
        "deb https://apt.dockerproject.org/repo/ \
        ubuntu-$(lsb_release -cs) \
        main"
-    sudo apt-get update
-    sudo apt-get -y install docker-engine
+    supass apt-get update
+    supass apt-get -y install docker-engine
     
-    grep -i "^docker" /etc/group ||  sudo groupadd docker 
-	id -Gn "max" | grep -qc "docker" || sudo usermod -a -G docker max
-	sudo service enable docker
-	sudo service start docker
-	sudo docker run hello-world
+    grep -i "^docker" /etc/group ||  supass groupadd docker 
+	id -Gn "max" | grep -qc "docker" || supass usermod -a -G docker max
+	supass service enable docker
+	supass service start docker
+	supass docker run hello-world
 
     _itdocker_fix first
     
@@ -617,7 +623,7 @@ itdocker(){
 
 
 _itdocker_box(){
-	sudo docker run -d --restart=always -p 5000:5000 \
+	supass docker run -d --restart=always -p 5000:5000 \
          --name docker-proxy \
          -h proxy.tdocker.com  \
          -v /job/cache/docker/proxy:/var/lib/registry \
@@ -630,26 +636,26 @@ _itdocker_box(){
          -v /job/cache/docker/repo:/var/lib/registry  \
          registry:2 /var/lib/registry/config.yml
       
-    sudo docker run --name apt-cacher-ng -d --restart=always \
+    supass docker run --name apt-cacher-ng -d --restart=always \
          --publish 3142:3142  \
          --volume /job/cache/apt:/var/cache/apt-cacher-ng  \
          sameersbn/apt-cacher-ng
 
-    sudo docker run --name squid -d --restart=always \
+    supass docker run --name squid -d --restart=always \
          --publish 3128:3128 \
          --volume /job/cache/squid/squid.conf:/etc/squid3/squid.conf \
          --volume /job/cache/squid/cache:/var/spool/squid3 \
          sameersbn/squid
   
-    sudo docker run --name nginx -d -p 8082:80 \
+    supass docker run --name nginx -d -p 8082:80 \
          -v /job/cache/nginx/html:/usr/share/nginx/html \
          nginx
 
-    sudo docker run -d --restart=always -p 2525:8081 --name nexus \
+    supass docker run -d --restart=always -p 2525:8081 --name nexus \
          -v /job/cache/nexus:/nexus-data \
          sonatype/nexus3
 
-    sudo docker run -d --restart=always --name jenkins -p 3131:8080 -p 50000:50000 \
+    supass docker run -d --restart=always --name jenkins -p 3131:8080 -p 50000:50000 \
          -v /job/cache/jenkins/home:/var/jenkins_home \
          jenkins
 
@@ -658,12 +664,12 @@ _itdocker_box(){
 
 itrkt(){
 	
-	#sudo apt-get install rkt
+	#supass apt-get install rkt
   gpg --recv-key 18AD5014C99EF7E3BA5F6CE950BDD3E0FC8A365E
 wget https://github.com/coreos/rkt/releases/download/v1.25.0/rkt_1.25.0-1_amd64.deb
 wget https://github.com/coreos/rkt/releases/download/v1.25.0/rkt_1.25.0-1_amd64.deb.asc
 gpg --verify rkt_1.25.0-1_amd64.deb.asc
-sudo dpkg -i rkt_1.25.0-1_amd64.deb	
+supass dpkg -i rkt_1.25.0-1_amd64.deb	
 }
 
 itbox(){
@@ -680,26 +686,26 @@ itbox(){
 	
 	if [[ -a  /etc/apt/sources.list.d/virtualbox.list ]]; then
 	  echo virtualbox repo exist. Remove it firstly!
-	  sudo rm -rf  /etc/apt/sources.list.d/virtualbox.list
+	  supass rm -rf  /etc/apt/sources.list.d/virtualbox.list
 	fi 
 	
 	if dpkg -l | grep -qw VirtualBox-${version}; then
-       sudo apt-get autoremove -y VirtualBox-${version}
+       supass apt-get autoremove -y VirtualBox-${version}
     fi   
     
-    echo 'deb http://download.virtualbox.org/virtualbox/debian xenial contrib' | sudo tee  /etc/apt/sources.list.d/virtualbox.list
+    echo 'deb http://download.virtualbox.org/virtualbox/debian xenial contrib' | supass tee  /etc/apt/sources.list.d/virtualbox.list
     wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc  -O /tmp/oracle_vbox_2016.asc
-    sudo apt-key add /tmp/oracle_vbox_2016.asc
+    supass apt-key add /tmp/oracle_vbox_2016.asc
     
-    sudo apt-get update
-	sudo apt-get install -y dkms VirtualBox-${version}
+    supass apt-get update
+	supass apt-get install -y dkms VirtualBox-${version}
 
-	grep -i "^vboxusers" /etc/group ||  sudo groupadd vboxusers 
-	id -Gn "max" | grep -qc "vboxusers" || sudo usermod -a -G vboxusers max
+	grep -i "^vboxusers" /etc/group ||  supass groupadd vboxusers 
+	id -Gn "max" | grep -qc "vboxusers" || supass usermod -a -G vboxusers max
 	
 	#VBoxManage list extpacks
-	#sudo VBoxManage extpack install Oracle_VM_VirtualBox_Extension_Pack-4.3.12-93733.vbox-extpack
-	#sudo VBoxManage extpack uninstall "Oracle VM VirtualBox Extension Pack"
+	#supass VBoxManage extpack install Oracle_VM_VirtualBox_Extension_Pack-4.3.12-93733.vbox-extpack
+	#supass VBoxManage extpack uninstall "Oracle VM VirtualBox Extension Pack"
 	
 	#rpm -qa | grep -qw glibc-static || yum install glibc-static
 	#debian:dpkg -l | grep -qw package || apt-get install package
@@ -713,12 +719,12 @@ _itvagrant_fix(){
 	
 	if [ "$1" = "plugin" ]; then
 	   echo "Installing plugins,Waitting........"
-	   cut -f 1 -d "(" ${PWD}/.max/vagrant-plugins | cat | while read VGPLUGIN; do
+	   cut -f 1 -d "(" $MAX_SHELL/vagrant-plugins | cat | while read VGPLUGIN; do
          vagrant plugin list | grep $VGPLUGIN || vagrant plugin install $VGPLUGIN
        done
 	elif [ "$1" = "box" ]; then
 	   echo "Installing boxes,Waitting........"
-	   cut -f 1 -d "(" ${PWD}/.max/vagrant-boxes | cat | while read VGBOX; do
+	   cut -f 1 -d "(" $MAX_SHELL/vagrant-boxes | cat | while read VGBOX; do
          vagrant box list | grep $VGBOX || vagrant box add $VGBOX --provider virtualbox
        done
 	fi
@@ -740,12 +746,12 @@ itvagrant(){
 	
 	version=$1
 	if  rpm -qa | grep -qw vagrant; then
-       sudo dnf remove -y  vagrant
+       supass dnf remove -y  vagrant
     fi
-    #sudo rpm -Uvh $MAX_HOME/.max/vagrant_1.9.1_x86_64.rpm 
+    #supass rpm -Uvh $MAX_HOME/.max/vagrant_1.9.1_x86_64.rpm 
     echo https://releases.hashicorp.com/vagrant/${version}/vagrant_${version}_x86_64.deb
 	aria2c -c -x 10 -j 10  -d/tmp -o vagrant_${version}_x86_64.deb  https://releases.hashicorp.com/vagrant/${version}/vagrant_${version}_x86_64.deb && \
-	sudo apt-get install /tmp/vagrant_${version}_x86_64.deb 
+	supass apt-get install /tmp/vagrant_${version}_x86_64.deb 
 	_itvagrant_fix plugin
 	_itvagrant_fix box
 		
@@ -756,7 +762,7 @@ itvagrant(){
 ##virtualenvwrapper
 itenv(){
   pip install virtualenvwrapper
-  export WORKON_HOME=~/Envs
+  export WORKON_HOME=$MAX_HOME/Envs
   mkdir -p $WORKON_HOME
   source /usr/local/bin/virtualenvwrapper.sh	
   mkvirtualenv env1
@@ -768,9 +774,9 @@ _itpython_fix(){
       wget https://bootstrap.pypa.io/get-pip.py -O /tmp/get-pip.py
    fi
    
-   echo $LOGINPASSWD |  sudo -S  python /tmp/get-pip.py
-   echo $LOGINPASSWD |  sudo -S  pip install Django==1.10.5	
-   echo $LOGINPASSWD |  sudo -S  pip install Flask
+   supass python /tmp/get-pip.py
+   supass  pip install Django==1.10.5	
+   supass  pip install Flask
 }
 
 
@@ -782,8 +788,8 @@ itpython(){
 	   return 0
   fi
 	
-  git clone https://github.com/yyuu/pyenv.git ~/.pyenv	
-  git clone https://github.com/yyuu/pyenv-virtualenv.git ~/.pyenv/plugins/pyenv-virtualenv
+  git clone https://github.com/yyuu/pyenv.git $MAX_HOME/.pyenv	
+  git clone https://github.com/yyuu/pyenv-virtualenv.git $MAX_HOME/.pyenv/plugins/pyenv-virtualenv
   ldpyenv
   if [ ! -z "$1" ]; then
     for ver in "$@"
@@ -797,42 +803,42 @@ itfileserver(){
 	#/etc/exports
 	#/ubuntu  *(ro,sync,no_root_squash)
     #/home    *(rw,sync,no_root_squash)
-    #client (sudo apt install nfs-common)
-    #sudo mount example.hostname.com:/ubuntu /local/ubuntu
+    #client (supass apt install nfs-common)
+    #supass mount example.hostname.com:/ubuntu /local/ubuntu
     # /etc/fstab
     # example.hostname.com:/ubuntu /local/ubuntu nfs rsize=8192,wsize=8192,timeo=14,intr
-	sudo apt install -y nfs-kernel-server
-	sudo systemctl start nfs-kernel-server.service
+	supass apt install -y nfs-kernel-server
+	supass systemctl start nfs-kernel-server.service
 	
-	sudo apt install -y samba
-	sudo apt install libpam-winbind
-	sudo augtool <<-EOF
+	supass apt install -y samba
+	supass apt install libpam-winbind
+	supass augtool <<-EOF
 set /files/etc/samba/smb.conf/target[*][.="global"]/workgroup maxkerrer
 set /files/etc/samba/smb.conf/target[*][.="global"]/security user
-set /files/etc/samba/smb.conf/target[last()] share
-set /files/etc/samba/smb.conf/target[last()]/comment "Ubuntu File Server Share"
-set /files/etc/samba/smb.conf/target[last()]/path    /srv/samba/share
-set /files/etc/samba/smb.conf/target[last()]/browsable  yes
-set "/files/etc/samba/smb.conf/target[last()]/guest ok"  yes
-set "/files/etc/samba/smb.conf/target[last()]/read only"  no
-set "/files/etc/samba/smb.conf/target[last()]/create mask" 0755
+set /files/etc/samba/smb.conf/target[301] share
+set /files/etc/samba/smb.conf/target[301]/comment "Ubuntu File Server Share"
+set /files/etc/samba/smb.conf/target[301]/path    /srv/samba/share
+set /files/etc/samba/smb.conf/target[301]/browsable  yes
+set "/files/etc/samba/smb.conf/target[301]/guest ok"  yes
+set "/files/etc/samba/smb.conf/target[301]/read only"  no
+set "/files/etc/samba/smb.conf/target[301]/create mask" 0755
 save
 quit
 EOF
-    sudo mkdir -p /srv/samba/share
-    sudo chown nobody:nogroup /srv/samba/share/
-    sudo systemctl restart smbd.service nmbd.service
+    supass mkdir -p /srv/samba/share
+    supass chown nobody:nogroup /srv/samba/share/
+    supass systemctl restart smbd.service nmbd.service
 }
 
-### ssh config and ssh for github ( ~/.ssh)
+### ssh config and ssh for github ( $MAX_HOME/.ssh)
 
-### stormpath maxkerrer@live.com 1tw (~/.stormpath)
+### stormpath maxkerrer@live.com 1tw ($MAX_HOME/.stormpath)
 
-###/etc/host , /etc/fstab, ~/.zshrc  /etc/pip.conf 
+###/etc/host , /etc/fstab, $MAX_HOME/.zshrc  /etc/pip.conf 
 
 ### backup .vagrant.d/   /var/lib/docker
 
-### ~/.m2/setting 
+### $MAX_HOME/.m2/setting 
 
 ####clitools for https://github.com/webdev# Reset
 
@@ -840,7 +846,7 @@ EOF
 ###travis for travis-ci.com
 
 
-### ~/.stormpath/apiKey.properties for https://api.stormpath.com  salty-squall:mk@live:1t9
+### $MAX_HOME/.stormpath/apiKey.properties for https://api.stormpath.com  salty-squall:mk@live:1t9
 
 
 ##mulesoft maxkerrer 1tWS
@@ -850,16 +856,16 @@ EOF
 
 ########################################################################
 ldsdk () {
-  export SDKMAN_DIR="/home/max/.sdkman"
-  [[ -s "/home/max/.sdkman/bin/sdkman-init.sh" ]] && source "/home/max/.sdkman/bin/sdkman-init.sh" 
+  export SDKMAN_DIR="$MAX_HOME/.sdkman"
+  [[ -s "$MAX_HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$MAX_HOME/.sdkman/bin/sdkman-init.sh" 
 }
 
 ldgvm () {
-  [[ -s "/home/max/.gvm/scripts/gvm" ]] && source "/home/max/.gvm/scripts/gvm"
+  [[ -s "$MAX_HOME/.gvm/scripts/gvm" ]] && source "$MAX_HOME/.gvm/scripts/gvm"
 }
 
 ldnvm () {
-  export NVM_DIR="/home/max/.nvm"
+  export NVM_DIR="$MAX_HOME/.nvm"
   [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
 }
 
@@ -869,11 +875,11 @@ ldjenv () {
 }
 
 ldperlbrew () {
-   source ~/perl5/perlbrew/etc/bashrc
+   source $MAX_HOME/perl5/perlbrew/etc/bashrc
 }
 
 ldrakudobrew () {
-   export PATH=~/.rakudobrew/bin:$PATH
+   export PATH=$MAX_HOME/.rakudobrew/bin:$PATH
    rakudobrew init 
 }
 
@@ -890,7 +896,7 @@ ldrvm () {
 }
 
 ldenvwrap() {
-   export WORKON_HOME=~/Envs
+   export WORKON_HOME=$MAX_HOME/Envs
    source /usr/bin/virtualenvwrapper.sh
 }
 
@@ -929,13 +935,13 @@ function itdockerimages {
 		imageVersion=$(echo $conImage | awk -F: '{print $2}')
 		imageBase="${imageName##*/}"
 		if [[ "rkt" = "$conType" ]]; then 
-			echo $LOGINPASSWD | sudo -S rkt image list | grep -s "$imageName.*$imageVersion" ||  sudo rkt fetch $imageName:$imageVersion  
-			echo $LOGINPASSWD | sudo -S rkt image export  $imageName:$imageVersion "/job/images/${imageBase}_${imageVersion}.aci"
+			supass rkt image list | grep -s "$imageName.*$imageVersion" ||  supass rkt fetch $imageName:$imageVersion  
+			supass rkt image export  $imageName:$imageVersion "/job/images/${imageBase}_${imageVersion}.aci"
 		elif [[ "docker" = "$conType" ]]; then
-			echo $LOGINPASSWD | sudo -S docker images | grep -s "$imageName.*$imageVersion" ||  sudo docker pull $imageName:$imageVersion  
-			echo $LOGINPASSWD | sudo -S docker save $imageName:$imageVersion > "/job/images/${imageBase}_${imageVersion}.tar"
+			supass docker images | grep -s "$imageName.*$imageVersion" ||  supass docker pull $imageName:$imageVersion  
+			supass docker save $imageName:$imageVersion > "/job/images/${imageBase}_${imageVersion}.tar"
 		fi
-		sudo chmod -R 0777 /job/images
+		supass chmod -R 0777 /job/images
 	done <<< "$VAR"
 }
 
@@ -957,7 +963,13 @@ function ldimages {
 		imageVersion=$(echo $conImage | awk -F: '{print $2}')
 		imageBase="${imageName##*/}"
  
-		[[ "${controllerImgs[@]}" =~ " $imageBase " ]] && echo "$(tput setaf 1)$(tput setab 7)Load $imageBase.... $(tput sgr0)" || continue 
+		[[ "${controllerImgs[@]}" =~ " $imageBase " ]] && echo "$(tput setaf 1)$(tput setab 7)Load $imageBase.... $(tput sgr0)" || continue
+
+                if [[ "rkt" = "$conType" ]]; then 
+                    supass  rkt image list | grep -s "$imageName.*$imageVersion" ||  supass rkt fetch --insecure-options=image "/vagrant/${imageBase}_${imageVersion}.aci"
+                elif [[ "docker" = "$conType" ]]; then
+                    supass  docker images | grep -s "$imageName.*$imageVersion" ||  supass docker load < "/vagrant/${imageBase}_${imageVersion}.tar"
+                fi 
 	done <<< "$VAR"
 }
 
