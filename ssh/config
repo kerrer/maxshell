@@ -1,0 +1,19 @@
+Host github-kerrer
+  User git
+  Hostname github.com
+  PreferredAuthentications publickey
+  IdentityFile ~/.ssh/id_rsa
+
+Host github-puppetmax
+  User git
+  Hostname github.com
+  PreferredAuthentications publickey
+  IdentitiesOnly yes
+  IdentityFile ~/.ssh/puppetmax
+
+Host github-workdemos
+  User git
+  Hostname github.com
+  PreferredAuthentications publickey
+  IdentitiesOnly yes
+  IdentityFile ~/.ssh/workdemos

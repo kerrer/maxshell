@@ -170,12 +170,6 @@ function optimimat {
  echo ""
 }
 
-function regrup {
-    sudo dnf reinstall grub2-efi grub2-efi-modules shim
-    sudo grub2-mkconfig -o /boot/efi/EFI/fedora/grub.cfg
-    ###for ubutnu  change uuid in /etc/fstab 
-}
-
 function itmirrors {
     supass mv /etc/yum.repos.d/fedora.repo /etc/yum.repos.d/fedora.repo.backup
     supass mv /etc/yum.repos.d/fedora-updates.repo /etc/yum.repos.d/fedora-updates.repo.backup
@@ -185,7 +179,7 @@ function itmirrors {
 }
 
 function devpkg {
-	supass  dnf install -y nano git geany thunderbird  zsh fish curl aria2 p7zip augeas augeas-devel subversion mercurial expect dnf-plugins-core util-linux-user
+	supass  dnf install -y nano git geany thunderbird  zsh fish curl aria2 augeas augeas-devel subversion mercurial expect dnf-plugins-core util-linux-user
 	supass  dnf install -y make automake gcc gcc-c++ kernel-devel  
 	#groupinstall "Development Tools" "Development Libraries"
 }
@@ -316,7 +310,7 @@ function _install_fish {
 
 function _sh_alias {
    alias a2c="aria2c -c -x 10 -j 10"	
-   source $HOME/max/alias.sh
+   source ./max/.alias.sh
 }
 #zsh/fish
 function itshtheme {	
@@ -331,12 +325,6 @@ function itshtheme {
 	}
 }
 
-function itssh {
-  mkdir $HOME/.ssh
-  cp $MAX_SHELL/ssh/* $HOME/.ssh
-  chmod 700 $HOME/.ssh
-  chmod 600 $HOME/.ssh/authorized_keys
-}
 
 #$MAX_HOME/bin
 function itbin {
@@ -375,19 +363,13 @@ function itbin {
 	   fi
     done	
 
-    curl -L https://github.com/docker/compose/releases/download/1.12.0/docker-compose-`uname -s`-`uname -m` > $HOME/bin/docker-compose
-    chmod +x $HOME/bin/docker-compose
-
-    curl -L https://github.com/docker/machine/releases/download/v0.10.0/docker-machine-`uname -s`-`uname -m` > $HOME/bin/docker-machine 
-    chmod +x $HOME/bin/docker-machine 
-
+    
     wget https://releases.hashicorp.com/packer/0.12.2/packer_0.12.2_linux_amd64.zip -O /tmp/packer_0.12.2_linux_amd64.zip
     cd  /tmp && unzip packer_0.12.2_linux_amd64.zip && mv packer $MAX_HOME/bin/
     chmod +x  $MAX_HOME/bin/packer
     
     wget http://www.rarlab.com/rar/rarlinux-5.4.0.tar.gz -O /tmp/rarlinux-5.4.0.tar.gz
-    cd /tmp && tar xvzf rarlinux-5.4.0.tar.gz  && mv rar $MAX_HOME/bin/    
-    ln -s $MAX_HOME/bin/rar/unrar $MAX_HOME/bin/unrar
+    cd /tmp && tar xvzf rarlinux-5.4.0.tar.gz  && mv rar $MAX_HOME/bin/
     chmod -R $MAX_HOME/bin/rar/
     
     wget https://github.com/containers/build/releases/download/v0.4.0/acbuild-v0.4.0.tar.gz -O  /tmp/acbuild-v0.4.0.tar.gz
@@ -432,26 +414,17 @@ function itjava  {
 }
  
 function itchrome {
-   if read -t 10 -q "choice?Is it installed from File [Y|N]:"  ; then 
-            if  [ ! -f /tmp/VirtualBox-${version}.rpm ]; then
-               echo ""
-               echo -n "Enter virutualbox download url and press [ENTER]: "
-               read vbdownloadurl
-               echo ""
-               aria2c -c -x 10 -j 10  -d/tmp -o VirtualBox-${version}.rpm  $vbdownloadurl               
-            fi
-            supass dnf install -y /tmp/VirtualBox-${version}.rpm
-   else
-      chrome_file="/etc/yum.repos.d/google-chrome.repo"
-      [[ -a  $chrome_file ]] && supass rm -f $chrome_file
-   
-      supass cp $MAX_SHELL/google-chrome.repo  /etc/yum.repos.d/google-chrome.repo
-
-      supass dnf install -y google-chrome-stable
-      #supass dnf install google-chrome-beta
-      #supass dnf install google-chrome-unstable
+   chrome_file="/etc/yum.repos.d/google-chrome.repo"
+   if [[ -a  $chrome_file ]]; then
+     echo File: $chrome_file exist. Remove it firstly!
+     supass rm -f $chrome_file
    fi
    
+   supass cp $MAX_SHELL/google-chrome.repo  /etc/yum.repos.d/google-chrome.repo
+
+   supass dnf install -y google-chrome-stable
+   #supass dnf install google-chrome-beta
+   #supass dnf install google-chrome-unstable
 }
 
 #jenv for java (http://www.jenv.be/)
@@ -673,12 +646,13 @@ function itdocker {
     https://download.docker.com/linux/fedora/docker-ce.repo
     supass dnf makecache fast
     supass dnf install -y docker-ce
-    supass systemctl enable docker
     supass systemctl start docker
     
     grep -i "^docker" /etc/group ||  supass groupadd docker 
-    id -Gn "max" | grep -qc "docker" || supass usermod -a -G docker max
-     supass docker run hello-world
+	id -Gn "max" | grep -qc "docker" || supass usermod -a -G docker max
+	supass service enable docker
+	supass service start docker
+	supass docker run hello-world
 
     _itdocker_fix first
     
@@ -892,9 +866,9 @@ function itfileserver {
     # /etc/fstab
     # dlp.srv.world:/home /home     nfs     defaults        0 0
     
-        supass dnf -y install nfs-utils
-        #vi /etc/idmapd.conf
-        #Domain = srv.world
+    supass dnf -y install nfs-utils
+     vi /etc/idmapd.conf
+     Domain = srv.world
 	supass systemctl start rpcbind nfs-server 
 	supass systemctl enable rpcbind nfs-server 
 	supass  firewall-cmd --add-service=nfs --permanent 
@@ -903,18 +877,18 @@ function itfileserver {
 	supass dnf -y install samba samba-client
 	supass  mkdir /home/share
 	supass  chmod 777 /home/share
-	sudo augtool <<-EOF
+	supass augtool <<-EOF
 set "/files/etc/samba/smb.conf/target[*][.='global']/unix charset" UTF-8
 set /files/etc/samba/smb.conf/target[*][.="global"]/workgroup maxkerrer
-set "/files/etc/samba/smb.conf/target[*][.='global']/map to guest" "Bad User"
-set "/files/etc/samba/smb.conf/target[*][.='global']/hosts allow" "127.10.0.0"
-set /files/etc/samba/smb.conf/target[last()+1] share
-set /files/etc/samba/smb.conf/target[last()]/comment "Ubuntu File Server Share"
-set /files/etc/samba/smb.conf/target[last()]/path    /srv/samba/share
-set /files/etc/samba/smb.conf/target[last()]/browsable  yes
-set "/files/etc/samba/smb.conf/target[last()]/guest ok"  yes
-set "/files/etc/samba/smb.conf/target[last()]/read only"  no
-set "/files/etc/samba/smb.conf/target[last()]/create mask" 0755
+set "/files/etc/samba/smb.conf/target[*][.='global']/map to guest" = Bad User
+set "/files/etc/samba/smb.conf/target[*][.='global']/hosts allow" 127.10.0.0.
+set /files/etc/samba/smb.conf/target[301] share
+set /files/etc/samba/smb.conf/target[301]/comment "Ubuntu File Server Share"
+set /files/etc/samba/smb.conf/target[301]/path    /srv/samba/share
+set /files/etc/samba/smb.conf/target[301]/browsable  yes
+set "/files/etc/samba/smb.conf/target[301]/guest ok"  yes
+set "/files/etc/samba/smb.conf/target[301]/read only"  no
+set "/files/etc/samba/smb.conf/target[301]/create mask" 0755
 save
 quit
 EOF
@@ -1077,23 +1051,13 @@ function ldimages {
 ########################################################################
 #test
 ittestperl(){
-  ${MAX_HOME}/.max/perltest.pl sdfafafa asdfasfas  || echo failure
+  ${MAX_HOME}/.max/perltest.pl sdfafafa asdfasfas  || echo failure	
+  
+
 }
 
 ittestpython(){
 	/job/shell/test.py sdfafafa asdfasfas  || echo failure	
-}
-
-ittestruby(){
-
-}
-
-ittestgo(){
-
-}
-
-ittestscala(){
-
 }
 
 ldtest(){
