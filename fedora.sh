@@ -196,7 +196,12 @@ function itmirrors {
     sudo pip install -i http://pypi.douban.com/simple/ saltTesting
     
     #cpan
-    
+    #  perl -MCPAN -e shell
+    # o conf  urllist unshift http://mirrors.aliyun.com/CPAN/
+    # o conf commit
+    mkdir -p $HOME/.cpan/CPAN/
+    cp $HOME/MyConfig.pm $HOME/.cpan/CPAN/MyConfig.pm
+
     #gem
     
     #maven

@@ -527,8 +527,9 @@ itgvm(){
 
 #perlbrew for perl 5
 _itperl_fix(){
-  #o conf  urllist unshift http://mirrors.aliyun.com/CPAN/
-  #o conf commit
+  #  perl -MCPAN -e shell
+  # o conf  urllist unshift http://mirrors.aliyun.com/CPAN/
+  # o conf commit
   supass  perl -MCPAN -e 'install App::cpanminus'
   supass  cpanm  Capture::Tiny 
   supass  cpanm Dancer2  Catalyst::Devel Mojolicious
