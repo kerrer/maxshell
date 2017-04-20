@@ -25,8 +25,10 @@ LOGINPASSWD="mmmm"
 
 LOG_FILE="$MAX_HOME/install_log"
 
+OSNAME=`python -c "import platform;print(platform.linux_distribution()[0])"`
 
 alias supass="echo $LOGINPASSWD | sudo -S "
+alias gitp="git push -u origin master "
 echo progress-bar >> $MAX_HOME/.curlrc
 ########################################################################
 #colors for echo
@@ -531,7 +533,7 @@ _itperl_fix(){
   # o conf  urllist unshift http://mirrors.aliyun.com/CPAN/
   # o conf commit
   supass  perl -MCPAN -e 'install App::cpanminus'
-  supass  cpanm  Capture::Tiny 
+  supass  cpanm  Capture::Tiny Git::Hooks
   supass  cpanm Dancer2  Catalyst::Devel Mojolicious
 }
 
@@ -985,6 +987,7 @@ function ldimages {
 	done <<< "$VAR"
 }
 
+
 ########################################################################
 ########################################################################
 #test
@@ -1000,4 +1003,21 @@ ittestpython(){
 
 ldtest(){
 	echo $(pwd)
+}
+
+ldtestos() {
+  UNAME=$(uname | tr "[:upper:]" "[:lower:]")
+# If Linux, try to determine specific distribution
+if [ "$UNAME" == "linux" ]; then
+    # If available, use LSB to identify distribution
+    if [ -f /etc/lsb-release -o -d /etc/lsb-release.d ]; then
+        export DISTRO=$(lsb_release -i | cut -d: -f2 | sed s/'^\t'//)
+    # Otherwise, use release info file
+    else
+        export DISTRO=$(ls -d /etc/[A-Za-z]*[_-][rv]e[lr]* | grep -v "lsb" | cut -d'/' -f3 | cut -d'-' -f1 | cut -d'_' -f1)
+    fi
+fi
+# For everything else (or if above failed), just use generic identifier
+[ "$DISTRO" == "" ] && export DISTRO=$UNAME
+unset UNAME	
 }

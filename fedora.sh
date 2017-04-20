@@ -32,7 +32,7 @@ export CLASSPATH="${CLASSPATH}:$SDK_HOME/libs"
 LOGINPASSWD="mmmm"
 LOG_FILE="$MAX_HOME/install_log"
 
-
+OSNAME=`python -c "import platform;print(platform.linux_distribution()[0])"`
 alias supass="echo $LOGINPASSWD | sudo -S "
 echo progress-bar >> $MAX_HOME/.curlrc
 
