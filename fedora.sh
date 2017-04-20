@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 #Ubuntu:
 #prep:
 # 1. install zsh and chsh zsh
@@ -16,13 +16,20 @@
 echo "Hello World!"
 MAX_HOME="/home/max"
 MAX_SHELL="/work/max"
+SDK_HOME=$HOME/sdk
 
 export JAVA_HOME=/usr/java/latest
-export GOROOT_BOOTSTRAP=$MAX_HOME/bin/go1.4
-export PATH=$PATH:$JAVA_HOME/bin
 
+export MAVEN_HOME=$SDK_HOME/apache-maven-3.5.0
+export GROOVY_HOME=$SDK_HOME/groovy-2.5.0-alpha-1
+export SCALA_HOME=$SDK_HOME/scala-2.12
+export GOROOT=$SDK_HOME/go1.8.1.linux-amd64/go
+export ACTIVATOR_HOME=$SDK_HOME/activator-1.3.12-minimal
+export GRADLE_HOME=$SDK_HOME/gradle-3.5
+
+export PATH=$PATH:$JAVA_HOME/bin:$MAVEN_HOME/bin:$GROOVY_HOME/bin:$SCALA_HOME/bin:$GOROOT/bin:$ACTIVATOR_HOME/bin:$GRADLE_HOME/bin
+export CLASSPATH="${CLASSPATH}:$SDK_HOME/libs"
 LOGINPASSWD="mmmm"
-
 LOG_FILE="$MAX_HOME/install_log"
 
 
@@ -177,11 +184,30 @@ function regrup {
 }
 
 function itmirrors {
+    #os
     supass mv /etc/yum.repos.d/fedora.repo /etc/yum.repos.d/fedora.repo.backup
     supass mv /etc/yum.repos.d/fedora-updates.repo /etc/yum.repos.d/fedora-updates.repo.backup
     supass wget -O /etc/yum.repos.d/fedora.repo http://mirrors.aliyun.com/repo/fedora.repo
     supass wget -O /etc/yum.repos.d/fedora-updates.repo http://mirrors.aliyun.com/repo/fedora-updates.repo
     supass yum makecache
+    
+    #pip
+    sudo easy_install -i http://pypi.douban.com/simple/ saltTesting 
+    sudo pip install -i http://pypi.douban.com/simple/ saltTesting
+    
+    #cpan
+    
+    #gem
+    
+    #maven
+    #<mirrors>
+    #<mirror>
+    #  <id>alimaven</id>
+    #  <name>aliyun maven</name>
+    #  <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
+    #  <mirrorOf>central</mirrorOf>        
+    #</mirror>
+    # </mirrors>
 }
 
 function devpkg {
@@ -457,6 +483,14 @@ function itchrome {
 #jenv for java (http://www.jenv.be/)
 
 
+function _fix_gem {
+   gem install foreman --no-document
+   gem install puppet  --no-document
+   gem install r10k
+	
+}
+
+
 #rbenv for ruby rails puppet
 function itrbenv {
 	ruby_version=""
@@ -615,10 +649,30 @@ function itperl {
 }
 #rakudobrew for perl 6
 
-function itvala {
-   supass add-apt-repository ppa:vala-team
-   supass dnf update
-   supass dnf install val	
+function itlang {
+   #vala	
+   sudo dnf install vala
+   
+   #mono
+   supass rpm --import "http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF"
+   supass dnf config-manager --add-repo   http://download.mono-project.com/repo/centos/
+   supass dnf install -y mono-devel  mono-complete  referenceassemblies-pcl ca-certificates-mono mono-xsp4
+   #dmd
+   curl -fsS https://dlang.org/install.sh | bash -s dmd
+   #rust
+   curl https://sh.rustup.rs -sSf | sh
+   
+   #Zimbu
+   #go
+   
+   #erlang
+   wget https://packages.erlang-solutions.com/erlang-solutions_1.0_all.deb
+   sudo dpkg -i erlang-solutions_1.0_all.deb
+   wget https://packages.erlang-solutions.com/erlang-solutions-1.0-1.noarch.rpm
+   rpm -Uvh erlang-solutions-1.0-1.noarch.rpm
+   sudo dnf install erlang elixir mongooseim
+   
+   #ring-lang
 }
 
 #docker and pull docker images
@@ -688,25 +742,26 @@ function itdocker {
 
 
 function _itdocker_box {
-    supass docker run -d --restart=always -p 5000:5000 \
+	#nexus,jenkins ###login-admin:mmmm
+    supass docker run -d  -p 5000:5000 \
          --name docker-proxy \
          -h proxy.tdocker.com  \
          -v /job/cache/docker/proxy:/var/lib/registry \
          registry:2 /var/lib/registry/config.yml 
      
      
-    supass docker run -d --restart=always -p 5001:5000 \
+    supass docker run -d -p 5001:5000 \
          --name docker-repo \
          -h repo.tdocker.com \
          -v /job/cache/docker/repo:/var/lib/registry  \
          registry:2 /var/lib/registry/config.yml
       
-    supass docker run --name apt-cacher-ng -d --restart=always \
+    supass docker run --name apt-cacher-ng -d  \
          --publish 3142:3142  \
          --volume /job/cache/apt:/var/cache/apt-cacher-ng  \
          sameersbn/apt-cacher-ng
 
-    supass docker run --name squid -d --restart=always \
+    supass docker run --name squid -d  \
          --publish 3128:3128 \
          --volume /job/cache/squid/squid.conf:/etc/squid3/squid.conf \
          --volume /job/cache/squid/cache:/var/spool/squid3 \
@@ -716,14 +771,28 @@ function _itdocker_box {
          -v /job/cache/nginx/html:/usr/share/nginx/html \
          nginx
 
-    supass docker run -d --restart=always -p 2525:8081 --name nexus \
+    
+    supass docker run -d  -p 2525:8081 --name nexus \
          -v /job/cache/nexus:/nexus-data \
          sonatype/nexus3
 
-    supass docker run -d --restart=always --name jenkins -p 3131:8080 -p 50000:50000 \
+   
+    supass docker run -d  --name jenkins -p 3131:8080 -p 50000:50000 \
          -v /job/cache/jenkins/home:/var/jenkins_home \
          jenkins
-
+     sonarqube
+     
+     redmine
+     
+     mysql
+     
+     postsql
+     
+     mariadb
+     
+     drone
+     
+     portainer
 }
 #virtualbox vagrant and pull vagrant boxes
 
