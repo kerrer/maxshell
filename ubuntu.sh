@@ -112,6 +112,7 @@ On_IWhite='\033[0;107m'   # White
  #/usr/lib/systemd/system/flanneld.service
 VAR=$(cat <<'END_HEREDOC'
 rkt     quay.io/coreos/flannel:v0.7.0
+docker  quay.io/coreos/flannel:v0.7.0
 rkt     quay.io/coreos/flannel:v0.6.2
 rkt     quay.io/coreos/hyperkube:v1.5.3_coreos.0
 docker  quay.io/coreos/hyperkube:v1.5.3_coreos.0
@@ -918,6 +919,15 @@ ldcoreoskubernetes(){
    kubectl config use-context vagrant-multi
 }
 
+function ldmirrors {
+  echo "cpan"
+  
+  echo "gem"
+  
+  echo "python pip"	
+  
+}
+
 ldvagrantkubernetetes(){
    export KUBERNETES_PROVIDER=vagrant
    export KUBERNETES_MASTER_MEMORY=1536
@@ -966,10 +976,11 @@ function ldimages {
 		[[ "${controllerImgs[@]}" =~ " $imageBase " ]] && echo "$(tput setaf 1)$(tput setab 7)Load $imageBase.... $(tput sgr0)" || continue
 
                 if [[ "rkt" = "$conType" ]]; then 
-                    supass  rkt image list | grep -s "$imageName.*$imageVersion" ||  supass rkt fetch --insecure-options=image "/vagrant/${imageBase}_${imageVersion}.aci"
+                    supass  rkt image list | grep -s "$imageName.*$imageVersion" ||  supass rkt fetch --insecure-options=image "/images/${imageBase}_${imageVersion}.aci"
                 elif [[ "docker" = "$conType" ]]; then
-                    supass  docker images | grep -s "$imageName.*$imageVersion" ||  supass docker load < "/vagrant/${imageBase}_${imageVersion}.tar"
+                    supass  docker images | grep -s "$imageName.*$imageVersion" ||  supass docker load < "/images/${imageBase}_${imageVersion}.tar"
                 fi 
+4
 	done <<< "$VAR"
 }
 
