@@ -231,8 +231,8 @@ function itmirrors {
     esac    
     
     supass   perl -MCPAN -e 'install App::cpanminus'
-    supass   cpanm  Capture::Tiny Git::Hooks
-    supass   cpanm Dancer2  Catalyst::Devel Mojolicious
+    cpanm  Capture::Tiny Git::Hooks Path::Class
+    cpanm Dancer2  Catalyst::Devel Mojolicious
   
 
     #gem
@@ -654,24 +654,11 @@ function itgvm {
 }
 
 #perlbrew for perl 5
-function _itperl_fix {
-  #o conf  urllist unshift http://mirrors.aliyun.com/CPAN/
-  #o conf commit
-  supass   perl -MCPAN -e 'install App::cpanminus'
-  supass   cpanm  Capture::Tiny 
-  supass   cpanm Dancer2  Catalyst::Devel Mojolicious
+function itperlbrew {
+   supass cpan App::perlbrew
+   perlbrew init
 }
 
-
-function itperl {
-   if [ ! -z "$1" ] && [[ "$1" = "fix" ]]; then
-	  echo "You had choosed to fix perl modules"
-	  _itperl_fix
-	  return 0
-   fi
-	
-    curl -L https://install.perlbrew.pl | bash	
-}
 #rakudobrew for perl 6
 
 itvala(){
@@ -704,6 +691,8 @@ function itlang {
    sudo dnf install erlang elixir mongooseim
    
    #ring-lang
+   
+   #perl 6
 }
 
 #docker and pull docker images
@@ -1038,6 +1027,10 @@ ldjenv () {
 
 ldperlbrew () {
    source $HOME/perl5/perlbrew/etc/bashrc
+}
+
+ldperl6 () {
+   docker run -it --rm rakudo-star	
 }
 
 ldrakudobrew () {
