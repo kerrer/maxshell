@@ -1,33 +1,28 @@
-#!/bin/bash
-#Ubuntu:
-#prep:
-# 1. install zsh and chsh zsh
-# 2. conf cpan "o conf urllist  unshift http://mirrors.aliyun.com/CPAN/"
-#1. install geany nano git mercurial 
-#2. install build essential(build tool dev) 
-#3. install java (openjdk/oracle jdk)http://www.if-not-true-then-false.com/2010/install-sun-oracle-java-jdk-jre-7-on-fedora-centos-red-hat-rhel/
-#4. install virtualbox
-#5. install vagant
-#6. install docker
-#7. pull vagran images  ubuntu centos
-#8. pull docker container  drupal,joomla,wordpress,mongdb,jenkins,redmine,registry,sonatype/nexus3,odoo.vimagick/opencart,alexcheng/magento,zeromq/zeromq,webcenter/activemq,rakudo-star,golang,java,ruby,perl,python
-#9. rbenv,pyenv,nvm,gvm,sdk
+#!/usr/bin/bash
 
 echo "Hello World!"
-MAX_HOME="/home/max"
 MAX_SHELL="/work/max"
+SDK_HOME=$HOME/sdk
 
 export JAVA_HOME=/usr/java/latest
-export GOROOT_BOOTSTRAP=$MAX_HOME/bin/go1.4
-export PATH=$PATH:$JAVA_HOME/bin
 
+export MAVEN_HOME=$SDK_HOME/apache-maven-3.5.0
+
+
+export GROOVY_HOME=$SDK_HOME/groovy-2.5.0-alpha-1
+export SCALA_HOME=$SDK_HOME/scala-2.12
+export GOROOT=$SDK_HOME/go1.8.1.linux-amd64/go
+export ACTIVATOR_HOME=$SDK_HOME/activator-1.3.12-minimal
+export GRADLE_HOME=$SDK_HOME/gradle-3.5
+
+export PATH=$PATH:$JAVA_HOME/bin:$MAVEN_HOME/bin:$GROOVY_HOME/bin:$SCALA_HOME/bin:$GOROOT/bin:$ACTIVATOR_HOME/bin:$GRADLE_HOME/bin
+export CLASSPATH="${CLASSPATH}:$SDK_HOME/libs"
 LOGINPASSWD="mmmm"
+LOG_FILE="$HOME/install_log"
 
-LOG_FILE="$MAX_HOME/install_log"
-
-
+OSNAME=`python -c "import platform;print(platform.linux_distribution()[0])"`
 alias supass="echo $LOGINPASSWD | sudo -S "
-echo progress-bar >> $MAX_HOME/.curlrc
+echo progress-bar >> $HOME/.curlrc
 
 ########################################################################
 #colors for echo
@@ -144,10 +139,10 @@ END_HEREDOC
 
 ########################################################################
 
-#if [[ ! -d $MAX_HOME/.oobash ]]; then
-#	git clone https://github.com/niieani/bash-oo-framework.git $MAX_HOME/.oobash
+#if [[ ! -d $HOME/.oobash ]]; then
+#	git clone https://github.com/niieani/bash-oo-framework.git $HOME/.oobash
 #fi 	
-#source "$MAX_HOME/.oobash/lib/oo-bootstrap.sh"
+#source "$HOME/.oobash/lib/oo-bootstrap.sh"
 
 #exec 3>&1 1>>${LOG_FILE} 2>&1
 #echo "This is stdout"
@@ -155,43 +150,99 @@ END_HEREDOC
 #echo "This is the console (fd 3)" 1>&3
 #echo "This is both the log and the console" | tee /dev/fd/3
 
+. $(dirname $0)/ubuntu.sh
+. $(dirname $0)/fedora.sh
+
+function itpkgs {
+   case  $OSNAME  in
+      Fedora)       
+          _fedora_devpkg
+          ;;
+      Ubuntu)
+          _ubuntu_devpkg
+          ;;           
+      *)              
+   esac 	
+}
 
 
 function optimimat {
-     #/etc/gdm/custom.conf file:
+   case  $OSNAME  in
+      Fedora)       
+          _fedora_optimimat
+          ;;
+      Ubuntu)
+          _ubuntu_optimimat
+          ;;           
+      *)              
+   esac 
+}
 
-    # GDM configuration storage
-
-    #[daemon]
-# Uncoment the line below to force the login screen to use Xorg
-#WaylandEnable=false
-
-#[security]
- echo ""
+function grep_repaire {
+   case  $OSNAME  in
+      Fedora)       
+          _fedora_regrup
+          ;;
+      Ubuntu)
+          _ubuntu_regrup
+          ;;           
+      *)              
+   esac 
 }
 
 function itmirrors {
-    supass mv /etc/yum.repos.d/fedora.repo /etc/yum.repos.d/fedora.repo.backup
-    supass mv /etc/yum.repos.d/fedora-updates.repo /etc/yum.repos.d/fedora-updates.repo.backup
-    supass wget -O /etc/yum.repos.d/fedora.repo http://mirrors.aliyun.com/repo/fedora.repo
-    supass wget -O /etc/yum.repos.d/fedora-updates.repo http://mirrors.aliyun.com/repo/fedora-updates.repo
-    supass yum makecache
+	#os
+	case  $OSNAME  in
+      Fedora)       
+          supass mv /etc/yum.repos.d/fedora.repo /etc/yum.repos.d/fedora.repo.backup
+          supass mv /etc/yum.repos.d/fedora-updates.repo /etc/yum.repos.d/fedora-updates.repo.backup
+          supass wget -O /etc/yum.repos.d/fedora.repo http://mirrors.aliyun.com/repo/fedora.repo
+          supass wget -O /etc/yum.repos.d/fedora-updates.repo http://mirrors.aliyun.com/repo/fedora-updates.repo
+          supass yum makecache
+          ;;
+      Ubuntu)
+          
+          ;;           
+      *)              
+    esac 
+    
+    
+    
+    #pip
+    #sudo easy_install -i http://pypi.douban.com/simple/ saltTesting 
+    #sudo pip install -i http://pypi.douban.com/simple/ saltTesting
+    mkdir -p $HOME/.pip
+    cp $MAX_SHELL/pip.conf $HOME/.pip/
+    
+    #cpan
+    #  perl -MCPAN -e shell
+    # o conf  urllist unshift http://mirrors.aliyun.com/CPAN/
+    # o conf commit
+    mkdir -p $HOME/.cpan/CPAN/
+    cp $MAX_SHELL/MyConfig.pm $HOME/.cpan/CPAN/MyConfig.pm
+
+    #gem
+    
+    #maven
+    #<mirrors>
+    #<mirror>
+    #  <id>alimaven</id>
+    #  <name>aliyun maven</name>
+    #  <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
+    #  <mirrorOf>central</mirrorOf>        
+    #</mirror>
+    # </mirrors>
 }
 
-function devpkg {
-	supass  dnf install -y nano git geany thunderbird  zsh fish curl aria2 augeas augeas-devel subversion mercurial expect dnf-plugins-core util-linux-user
-	supass  dnf install -y make automake gcc gcc-c++ kernel-devel  
-	#groupinstall "Development Tools" "Development Libraries"
-}
 
 function itwork {
-        #You must change all disk label name firstly!
-        ##############################################
-	if [[ $# < 3 ]]; then
+    #You must change all disk label name firstly!
+    ##############################################
+	if [[ $# < 2 ]]; then
 	   echo ""
-	   echo "  Usage: itwork [sdX for work] [sdx for job sdx for Downloads]"
+	   echo "  Usage: itwork [sdX for work] [sdX for job] [sdx for job sdx for Downloads]"
 	   echo ""
-	   echo "       Exmaple: itwork sdb1 db2 sb3"
+	   echo "       Exmaple: itwork sdb1 db2 [sb3]"
 	   echo ""
 	   echo ""
 	   return 1
@@ -199,22 +250,15 @@ function itwork {
 	
 	WORK_DEV=$1
 	JOB_DEV=$2
-        DOWN_DEV=$3
-
-	if [[ ! -d /work ]]; then
-	  supass  mkdir /work
-	fi
+   
+    [[ -d /work ]] || { supass mkdir /work && supass chown -R max:max /work }
 	
-	if [[ ! -d /job ]]; then
-	  supass  mkdir /job
-	fi
+	[[ -d /job  ]] || { supass mkdir /job  && supass chown -R max:max /job }
 	
-    supass  chown -R max:max /work /job
     workuuid=$(supass  blkid /dev/$WORK_DEV | awk  '{print $3}')
-    jobuuid=$(supass blkid /dev/$JOB_DEV | awk  '{print $3}')
-    downuuid=$(supass blkid /dev/$DOWN_DEV | awk  '{print $3}')
+    jobuuid=$(supass blkid /dev/$JOB_DEV | awk  '{print $3}')  
     
-    echo "add  /work /job Downloads to /etc/fstab"
+    echo "add  /work /job  to /etc/fstab"
     supass cp /etc/fstab /etc/fstab_$(date +%F-%kh%M)
     supass augtool <<-EOF
 set /files/etc/fstab/100/spec $workuuid
@@ -236,9 +280,14 @@ set /files/etc/fstab/101/passno 1
 save
 quit
 EOF
-     supass augtool <<-EOF
+     if [ ! -z "$3" ]
+     then
+        echo "add  Download  to /etc/fstab"
+        DOWN_DEV=$3
+        downuuid=$(supass blkid /dev/$DOWN_DEV | awk  '{print $3}')
+        supass augtool <<-EOF
 set /files/etc/fstab/102/spec $downuuid
-set /files/etc/fstab/102/file "$MAX_HOME/Downloads"
+set /files/etc/fstab/102/file "$HOME/Downloads"
 set /files/etc/fstab/102/vfstype ext4
 set /files/etc/fstab/102/opt defaults
 set /files/etc/fstab/102/dump 1
@@ -246,10 +295,25 @@ set /files/etc/fstab/102/passno 1
 save
 quit
 EOF
+     fi
+     
     supass mount -a
 }
 
 
+function itlang {
+	#supass apt-get install -y ibus-pinyin
+	#ibus restart
+	
+	#supass add-apt-repository ppa:fcitx-team/nightly
+	#supass apt-get update
+	
+	
+	supass apt-get install fcitx fcitx-pinyin fcitx-sunpinyin fcitx-googlepinyin fcitx-anthy fcitx-mozc
+	wget http://http.us.debian.org/debian/pool/main/o/open-gram/sunpinyin-data_0.1.22+20131212-1_amd64.deb -O /tmp/sunpinyin-data_0.1.22+20131212-1_amd64.deb
+	supass dpkg -i  /tmp/sunpinyin-data_0.1.22+20131212-1_amd64.deb
+    im-config
+}
 function infcitx {
    supass dnf install fcitx fcitx-devel fcitx-configtool fcitx-pinyin 
    export GTK_IM_MODULE=fcitx
@@ -277,41 +341,43 @@ EOF
 }
 
 function _install_zsh {
-	if [[ -d $MAX_HOME/.oh-my-zsh ]]; then
+	if [[ -d $HOME/.oh-my-zsh ]]; then
 	  echo oh-my-zsh exist. Remove it firstly!
-	  tar zcf $MAX_HOME/oh-my-zsh-backup_$(date +%F-%kh%M).tar.gz -C  $MAX_HOME/.oh-my-zsh
-	  rm -rf $MAX_HOME/.oh-my-zsh
+	  tar zcf $HOME/oh-my-zsh-backup_$(date +%F-%kh%M).tar.gz -C  $HOME/.oh-my-zsh
+	  rm -rf $HOME/.oh-my-zsh
 	fi 
 	
-	git clone git://github.com/robbyrussell/oh-my-zsh.git $MAX_HOME/.oh-my-zsh
+	git clone git://github.com/robbyrussell/oh-my-zsh.git $HOME/.oh-my-zsh
 	 
-	if [[ -a  $MAX_HOME/.zshrc ]]; then
+	if [[ -a  $HOME/.zshrc ]]; then
      echo zshrc: $chrome_file exist. Remove it firstly!
-     mv $MAX_HOME/.zshrc $MAX_HOME/.zshrc.$(date +%F-%kh%M).ori
+     mv $HOME/.zshrc $HOME/.zshrc.$(date +%F-%kh%M).ori
     fi
 	
-	cp $MAX_HOME/.oh-my-zsh/templates/zshrc.zsh-template $MAX_HOME/.zshrc
-	sed -i  -e 's/^ZSH_THEME=.*/ZSH_THEME="candy"/' -e 's/^plugins=.*/plugins=(rails git ruby Composer coffee cpanm docker gem github lein mercurial node npm perl pip vagrant)/' $MAX_HOME/.zshrc
-	echo 'source /work/max/fedora.sh' >> $MAX_HOME/.zshrc
+	cp $HOME/.oh-my-zsh/templates/zshrc.zsh-template $HOME/.zshrc
+	sed -i  -e 's/^ZSH_THEME=.*/ZSH_THEME="candy"/' -e 's/^plugins=.*/plugins=(rails git ruby Composer coffee cpanm docker gem github lein mercurial node npm perl pip vagrant)/' $HOME/.zshrc
+	echo "source ${MAX_SHELL}/max.sh" >> $HOME/.zshrc
 }
 
 function _install_fish {
-	if [[ -d $MAX_HOME/.oh-my-fish ]]; then
+	if [[ -d $HOME/.oh-my-fish ]]; then
 	  echo oh-my-fish exist. Remove it firstly!
-	  tar zcf $MAX_HOME/oh-my-fish-backup_$(date +%F-%kh%M).tar.gz -C $MAX_HOME/.oh-my-fish
-	  rm -rf $MAX_HOME/.oh-my-fish
+	  tar zcf $HOME/oh-my-fish-backup_$(date +%F-%kh%M).tar.gz -C $HOME/.oh-my-fish
+	  rm -rf $HOME/.oh-my-fish
 	fi 
 	
-	git clone https://github.com/oh-my-fish/oh-my-fish $MAX_HOME/.oh-my-fish
-	cd $MAX_HOME/.oh-my-fish
+	git clone https://github.com/oh-my-fish/oh-my-fish $HOME/.oh-my-fish
+	cd $HOME/.oh-my-fish
 	bin/install --offline
 	cd ~
 }
 
 function _sh_alias {
    alias a2c="aria2c -c -x 10 -j 10"	
-   source ./max/.alias.sh
+   source $MAX_SHELL/alias.sh
 }
+
+
 #zsh/fish
 function itshtheme {	
 	_install_zsh  || { 
@@ -325,17 +391,23 @@ function itshtheme {
 	}
 }
 
+function itssh {
+  mkdir $HOME/.ssh
+  cp $MAX_SHELL/ssh/* $HOME/.ssh/
+  chmod 700 $HOME/.ssh
+  chmod 600 $HOME/.ssh/authorized_keys
+}
 
-#$MAX_HOME/bin
+#$HOME/bin
 function itbin {
 	ACT="new"
 	if [ ! -z "$1" ] && [[ "$1" = "fix" ]]; then
 	  ACT="fix"
 	fi	
 	
-	INSTALL_LOG="$MAX_HOME/bin/.installed"
+	INSTALL_LOG="$HOME/bin/.installed"
 	
-	[ -d "$MAX_HOME/bin" ] ||  mkdir $MAX_HOME/bin
+	[ -d "$HOME/bin" ] ||  mkdir $HOME/bin
 	[ -f "$INSTALL_LOG" ] ||  touch $INSTALL_LOG	 
 	
 	declare -A hashmap
@@ -350,27 +422,33 @@ function itbin {
 	   EXCUTOR=$it
        GETURL=${hashmap[$it]}
        if [ "$ACT" = "new" ] || ( [ "$ACT" = "fix" ] && ! grep -q $EXCUTOR $INSTALL_LOG ) ; then
-         if [ "$ACT" = "new" ] && [ -e "$MAX_HOME/bin/$EXCUTOR" ] ; then
-             rm -rf "$MAX_HOME/bin/$EXCUTOR"
+         if [ "$ACT" = "new" ] && [ -e "$HOME/bin/$EXCUTOR" ] ; then
+             rm -rf "$HOME/bin/$EXCUTOR"
          fi
          
 	     echo "Installing $EXCUTOR..."
-	     wget $GETURL -O $MAX_HOME/bin/$EXCUTOR
-         chmod +x  $MAX_HOME/bin/$EXCUTOR
+	     wget $GETURL -O $HOME/bin/$EXCUTOR
+         chmod +x  $HOME/bin/$EXCUTOR
 	     echo "$EXCUTOR"  >> $INSTALL_LOG
 	   else
 	     echo "Installed $EXCUTOR" 
 	   fi
     done	
 
-    
+    curl -L https://github.com/docker/compose/releases/download/1.12.0/docker-compose-`uname -s`-`uname -m` > $HOME/bin/docker-compose
+    chmod +x $HOME/bin/docker-compose
+
+    curl -L https://github.com/docker/machine/releases/download/v0.10.0/docker-machine-`uname -s`-`uname -m` > $HOME/bin/docker-machine 
+    chmod +x $HOME/bin/docker-machine 
+
     wget https://releases.hashicorp.com/packer/0.12.2/packer_0.12.2_linux_amd64.zip -O /tmp/packer_0.12.2_linux_amd64.zip
-    cd  /tmp && unzip packer_0.12.2_linux_amd64.zip && mv packer $MAX_HOME/bin/
-    chmod +x  $MAX_HOME/bin/packer
+    cd  /tmp && unzip packer_0.12.2_linux_amd64.zip && mv packer $HOME/bin/
+    chmod +x  $HOME/bin/packer
     
     wget http://www.rarlab.com/rar/rarlinux-5.4.0.tar.gz -O /tmp/rarlinux-5.4.0.tar.gz
-    cd /tmp && tar xvzf rarlinux-5.4.0.tar.gz  && mv rar $MAX_HOME/bin/
-    chmod -R $MAX_HOME/bin/rar/
+    cd /tmp && tar xvzf rarlinux-5.4.0.tar.gz  && mv rar $HOME/bin/    
+    ln -s $HOME/bin/rar/unrar $HOME/bin/unrar
+    chmod -R $HOME/bin/rar/
     
     wget https://github.com/containers/build/releases/download/v0.4.0/acbuild-v0.4.0.tar.gz -O  /tmp/acbuild-v0.4.0.tar.gz
     cd /tmp && tar xvzf acbuild-v0.4.0.tar.gz 
@@ -380,7 +458,7 @@ function itbin {
 
 #intall oracle java
 function itjava  {
-	if [ -z "$1" ]
+    if [ -z "$1" ]
 	then
 	   echo ""
 	   echo "     Usage: itjava [java version: 7 8 0]"
@@ -389,45 +467,39 @@ function itjava  {
 	   return 1
 	fi
 	
-	jdk_version=$1
-	jdk_file=/tmp/jdk-$jdk_version-linux-x64.rpm
-
-        if [ ! -f $jdk_file  ]
-	then
-          read jdk_url
-	  echo get JDK: $jdk_url
-	  wget --header='Cookie: oraclelicense=accept-securebackup-cookie' $jdk_url -O $jdk_file
-	fi        
-        
-	echo install Oracle JDK: jdk-$jdk_version-linux-x64.rpm
-	supass rpm -Uvh $jdk_file
-	supass alternatives --install /usr/bin/java java /usr/java/latest/jre/bin/java 200000
-	supass alternatives --install /usr/bin/javaws javaws /usr/java/latest/jre/bin/javaws 200000
-	supass alternatives --install /usr/lib64/mozilla/plugins/libjavaplugin.so libjavaplugin.so.x86_64 /usr/java/latest/jre/lib/amd64/libnpjp2.so 200000
-	supass alternatives --install /usr/bin/javac javac /usr/java/latest/bin/javac 200000
-	supass alternatives --install /usr/bin/jar jar /usr/java/latest/bin/jar 200000
-
-        supass alternatives --config java
-        supass alternatives --config javaws
-        supass alternatives --config ibjavaplugin.so.x86_64    
-        supass alternatives --config javac  
+   jdk_version=$1
+   case  $OSNAME  in
+      Fedora)       
+          _fedora_itjava $jdk_version
+          ;;
+      Ubuntu)
+          _ubuntu_itjava $jdk_version
+          ;;           
+      *)              
+   esac   
 }
  
 function itchrome {
-   chrome_file="/etc/yum.repos.d/google-chrome.repo"
-   if [[ -a  $chrome_file ]]; then
-     echo File: $chrome_file exist. Remove it firstly!
-     supass rm -f $chrome_file
-   fi
-   
-   supass cp $MAX_SHELL/google-chrome.repo  /etc/yum.repos.d/google-chrome.repo
-
-   supass dnf install -y google-chrome-stable
-   #supass dnf install google-chrome-beta
-   #supass dnf install google-chrome-unstable
+   case  $OSNAME  in
+      Fedora)       
+          _fedora_itchrome
+          ;;
+      Ubuntu)
+          _ubuntu_itchrome
+          ;;           
+      *)              
+   esac 
 }
 
 #jenv for java (http://www.jenv.be/)
+
+function _fix_gem {
+   ldrbenv
+   gem install foreman --no-document
+   gem install puppet  --no-document
+   gem install r10k
+	
+}
 
 
 #rbenv for ruby rails puppet
@@ -445,14 +517,14 @@ function itrbenv {
 	   fi	   
 	fi
 	
-	if [[ -d $MAX_HOME/.rbenv ]]; then
+	if [[ -d $HOME/.rbenv ]]; then
 	  echo rbenv exist. Remove it firstly!
-	  tar zcf $MAX_HOME/rbenv-backup_$(date +%F-%kh%M).tar.gz -C $MAX_HOME/ .rbenv
-	  rm -rf $MAX_HOME/.rbenv
+	  tar zcf $HOME/rbenv-backup_$(date +%F-%kh%M).tar.gz -C $HOME/ .rbenv
+	  rm -rf $HOME/.rbenv
 	fi 
 	
-	git clone https://github.com/rbenv/rbenv.git $MAX_HOME/.rbenv
-	git clone https://github.com/rbenv/ruby-build.git $MAX_HOME/.rbenv/plugins/ruby-build
+	git clone https://github.com/rbenv/rbenv.git $HOME/.rbenv
+	git clone https://github.com/rbenv/ruby-build.git $HOME/.rbenv/plugins/ruby-build
 	
 	if [ ! -z  $ruby_version ]; then
 	   ldrbenv
@@ -464,10 +536,10 @@ function itrbenv {
 }
 
 function itrvm {	
-	if [[ -d $MAX_HOME/.rvm ]]; then
+	if [[ -d $HOME/.rvm ]]; then
 	  echo rvm exist. Remove it firstly!
-	  #tar zcvf $MAX_HOME/rvm-backup_$(date +%F-%kh%M).tar.gz -C $MAX_HOME/ .rvm
-	  rm -rf $MAX_HOME/.rvm
+	  #tar zcvf $HOME/rvm-backup_$(date +%F-%kh%M).tar.gz -C $HOME/ .rvm
+	  rm -rf $HOME/.rvm
 	fi 	
 	#gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3
 	curl -SL https://rvm.io/mpapis.asc | gpg2 --import -
@@ -495,14 +567,14 @@ function itsdk {
 	fi
     
     echo "Installing new sdkman..............."
-    if [[ -d $MAX_HOME/.sdkman ]]; then
+    if [[ -d $HOME/.sdkman ]]; then
 	  echo sdkman exist. Remove it firstly!
-	  tar zcvf $MAX_HOME/sdkman-backup_$(date +%F-%kh%M).tar.gz -C $MAX_HOME/ .sdkman
-	  rm -rf $MAX_HOME/.sdkman
+	  tar zcvf $HOME/sdkman-backup_$(date +%F-%kh%M).tar.gz -C $HOME/ .sdkman
+	  rm -rf $HOME/.sdkman
 	fi 
 	curl -s "https://get.sdkman.io" | bash
-	sed -i "s/sdkman_disable_gvm_alias=false/sdkman_disable_gvm_alias=true/" $MAX_HOME/.sdkman/etc/config
-	sed -i '/sdkman/d' $MAX_HOME/.zshrc
+	sed -i "s/sdkman_disable_gvm_alias=false/sdkman_disable_gvm_alias=true/" $HOME/.sdkman/etc/config
+	sed -i '/sdkman/d' $HOME/.zshrc
 	sdk version
 	_itsdk_fix
 }
@@ -525,10 +597,10 @@ function itnvm {
 	
 	
 	
-    if [[ -d $MAX_HOME/.nvm ]]; then
+    if [[ -d $HOME/.nvm ]]; then
 	  echo "nvm exist. Remove it firstly!"
-	  #tar zcvf $MAX_HOME/nvm-backup_$(date +%F-%kh%M).tar.gz -C $MAX_HOME/ .nvm
-	  rm -rf $MAX_HOME/.nvm
+	  #tar zcvf $HOME/nvm-backup_$(date +%F-%kh%M).tar.gz -C $HOME/ .nvm
+	  rm -rf $HOME/.nvm
 	fi 
     export NVM_DIR="$HOME/.nvm" && (
      git clone https://github.com/creationix/nvm.git "$NVM_DIR"
@@ -558,10 +630,10 @@ function upnvm {
 
 #gvm for golang
 function itgvm {
-  if [[ -d $MAX_HOME/.gvm ]]; then
+  if [[ -d $HOME/.gvm ]]; then
 	  echo oh-my-fish exist. Remove it firstly!
-	  tar zcf $MAX_HOME/gvm-backup_$(date +%F-%kh%M).tar.gz -C $MAX_HOME/.gvm
-	  rm -rf $MAX_HOME/.gvm
+	  tar zcf $HOME/gvm-backup_$(date +%F-%kh%M).tar.gz -C $HOME/.gvm
+	  rm -rf $HOME/.gvm
   fi 
   supass dnf install -y bison
   bash < <(curl -s -S -L https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer)	
@@ -588,10 +660,36 @@ function itperl {
 }
 #rakudobrew for perl 6
 
-function itvala {
+itvala(){
    supass add-apt-repository ppa:vala-team
-   supass dnf update
-   supass dnf install val	
+   supass apt-get update
+   supass apt-get install val	
+}
+
+function itlang {
+   #vala	
+   sudo dnf install vala
+   
+   #mono
+   supass rpm --import "http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF"
+   supass dnf config-manager --add-repo   http://download.mono-project.com/repo/centos/
+   supass dnf install -y mono-devel  mono-complete  referenceassemblies-pcl ca-certificates-mono mono-xsp4
+   #dmd
+   curl -fsS https://dlang.org/install.sh | bash -s dmd
+   #rust
+   curl https://sh.rustup.rs -sSf | sh
+   
+   #Zimbu
+   #go
+   
+   #erlang
+   wget https://packages.erlang-solutions.com/erlang-solutions_1.0_all.deb
+   sudo dpkg -i erlang-solutions_1.0_all.deb
+   wget https://packages.erlang-solutions.com/erlang-solutions-1.0-1.noarch.rpm
+   rpm -Uvh erlang-solutions-1.0-1.noarch.rpm
+   sudo dnf install erlang elixir mongooseim
+   
+   #ring-lang
 }
 
 #docker and pull docker images
@@ -627,7 +725,7 @@ function _itdocker_fix {
 
 
 #itdocker or itdocker fix [first|all]
-function itdocker {
+function itdocker { 
 	if [ ! -z "$1" ] && [[ $# -ge 2 ]] && [[ "$1" = "fix" ]]; then
 	   echo "You had choosed to fix docker images"
 	   _itdocker_fix $2
@@ -635,24 +733,22 @@ function itdocker {
 	fi
 	
 	echo "\e[1;31m  Installing new docker ........................  \e[0m"
-	supass dnf remove docker \
-                  docker-common \
-                  container-selinux \
-                  docker-selinux \
-                  docker-engine
-    
-    supass dnf config-manager \
-    --add-repo \
-    https://download.docker.com/linux/fedora/docker-ce.repo
-    supass dnf makecache fast
-    supass dnf install -y docker-ce
+	case  $OSNAME  in
+      Fedora)       
+          _fedora_itdocker
+          ;;
+      Ubuntu)
+          _ubuntu_itdocker
+          ;;           
+      *)              
+    esac
+   
+    supass systemctl enable docker
     supass systemctl start docker
     
     grep -i "^docker" /etc/group ||  supass groupadd docker 
-	id -Gn "max" | grep -qc "docker" || supass usermod -a -G docker max
-	supass service enable docker
-	supass service start docker
-	supass docker run hello-world
+    id -Gn "max" | grep -qc "docker" || supass usermod -a -G docker max
+    supass docker run hello-world
 
     _itdocker_fix first
     
@@ -662,25 +758,26 @@ function itdocker {
 
 
 function _itdocker_box {
-    supass docker run -d --restart=always -p 5000:5000 \
+	#nexus,jenkins ###login-admin:mmmm
+    supass docker run -d  -p 5000:5000 \
          --name docker-proxy \
          -h proxy.tdocker.com  \
          -v /job/cache/docker/proxy:/var/lib/registry \
          registry:2 /var/lib/registry/config.yml 
      
      
-    supass docker run -d --restart=always -p 5001:5000 \
+    supass docker run -d -p 5001:5000 \
          --name docker-repo \
          -h repo.tdocker.com \
          -v /job/cache/docker/repo:/var/lib/registry  \
          registry:2 /var/lib/registry/config.yml
       
-    supass docker run --name apt-cacher-ng -d --restart=always \
+    supass docker run --name apt-cacher-ng -d  \
          --publish 3142:3142  \
          --volume /job/cache/apt:/var/cache/apt-cacher-ng  \
          sameersbn/apt-cacher-ng
 
-    supass docker run --name squid -d --restart=always \
+    supass docker run --name squid -d  \
          --publish 3128:3128 \
          --volume /job/cache/squid/squid.conf:/etc/squid3/squid.conf \
          --volume /job/cache/squid/cache:/var/spool/squid3 \
@@ -690,66 +787,83 @@ function _itdocker_box {
          -v /job/cache/nginx/html:/usr/share/nginx/html \
          nginx
 
-    supass docker run -d --restart=always -p 2525:8081 --name nexus \
+    
+    supass docker run -d  -p 2525:8081 --name nexus \
          -v /job/cache/nexus:/nexus-data \
          sonatype/nexus3
 
-    supass docker run -d --restart=always --name jenkins -p 3131:8080 -p 50000:50000 \
+   
+    supass docker run -d  --name jenkins -p 3131:8080 -p 50000:50000 \
          -v /job/cache/jenkins/home:/var/jenkins_home \
          jenkins
-
+     sonarqube
+     
+     redmine
+     
+     mysql
+     
+     postsql
+     
+     mariadb
+     
+     drone
+     
+     portainer
+     
+     gitlab
 }
 #virtualbox vagrant and pull vagrant boxes
 
 function itrkt {	
-  #supass dnf install rkt
-  gpg --recv-key 18AD5014C99EF7E3BA5F6CE950BDD3E0FC8A365E
-  wget https://github.com/coreos/rkt/releases/download/v1.25.0/rkt-1.25.0-1.x86_64.rpm
-  wget https://github.com/coreos/rkt/releases/download/v1.25.0/rkt-1.25.0-1.x86_64.rpm.asc
-  gpg --verify rkt-1.25.0-1.x86_64.rpm.asc
-  supass rpm -Uvh rkt-1.25.0-1.x86_64.rpm	
-  supass setenforce Permissive
-  supass firewall-cmd --add-source=172.16.28.0/24 --zone=trusted
+  	case  $OSNAME  in
+      Fedora)       
+          _fedora_itrkt
+          ;;
+      Ubuntu)
+          _ubuntu_itrkt
+          ;;           
+      *)              
+    esac
 }
 
 function itvirtualBox {
 	if [ -z "$1" ]
 	then
 	   echo ""
-	   echo "     Usage: itvirtualBox [VirtualBox Version]"
+	   echo "     Usage: itbox [VirtualBox Version]"
 	   echo ""
 	   echo ""
 	   return 1
 	fi
 	
 	version=$1
+	VBOX_EXT=$(_pkgext)
 	
-	if [[ -a  /etc/yum.repos.d/virtualbox.repo ]]; then
-	  echo virtualbox repo exist. Remove it firstly!
-	  supass rm -rf  /etc/yum.repos.d/virtualbox.repo
-	fi 
-	
-	if rpm -qa | grep -qw VirtualBox-${version}; then
-          supass dnf remove -y VirtualBox-${version}
-        fi   
-        
-        if read -t 10 -q "choice?Is it installed from File [Y|N]:"  ; then 
-            if  [ ! -f /tmp/VirtualBox-${version}.rpm ]; then
+	_pkgremove VirtualBox-${version}  
+    
+	if read -t 10 -q "choice?Is it installed from File [Y|N]:"  ; then 
+            if  [ ! -f /tmp/VirtualBox-${version}.${VBOX_EXT} ]; then
                echo ""
                echo -n "Enter virutualbox download url and press [ENTER]: "
                read vbdownloadurl
                echo ""
-               aria2c -c -x 10 -j 10  -d/tmp -o VirtualBox-${version}.rpm  $vbdownloadurl               
+               aria2c -c -x 10 -j 10  -d/tmp -o VirtualBox-${version}.${VBOX_EXT}  $vbdownloadurl               
             fi
-            supass dnf install -y /tmp/VirtualBox-${version}.rpm
-        else
-            supass wget -q  http://download.virtualbox.org/virtualbox/rpm/fedora/virtualbox.repo -O /etc/yum.repos.d/virtualbox.repo
-            supass wget -q  https://www.virtualbox.org/download/oracle_vbox.asc  -O /tmp/oracle_vbox.asc
-            supass rpm --import  /tmp/oracle_vbox.asc    
-            supass dnf update
-	    supass dnf install -y dkms VirtualBox-${version}
-        fi
+            supass dnf install -y /tmp/VirtualBox-${version}.${VBOX_EXT}
+    else
+       case  $OSNAME  in
+           Fedora)       
+              _fedora_itvirtualBox $version
+              ;;
+           Ubuntu)
+              _ubuntu_itvirtualBox $version
+              ;;           
+           *)              
+       esac
+    fi
+        
 
+    
 	grep -i -q  "^vboxusers" /etc/group ||  supass groupadd vboxusers 
 	id -Gn "max" | grep -qc "vboxusers" || supass usermod -a -G vboxusers max
 	
@@ -793,19 +907,18 @@ function itvagrant {
 	   return 0
 	fi
 	
-	
 	version=$1
-	if  rpm -qa | grep -qw vagrant; then
-           supass dnf remove -y  vagrant
-        fi
-      
-	if [ ! -f /tmp/vagrant_${version}_x86_64.rpm  ]
-	then
-	  echo get https://releases.hashicorp.com/vagrant/${version}/vagrant_${version}_x86_64.rpm
-	  aria2c -c -x 10 -j 10  -d/tmp -o vagrant_${version}_x86_64.rpm  https://releases.hashicorp.com/vagrant/${version}/vagrant_${version}_x86_64.rpm
-	fi
-
-	supass dnf install -y /tmp/vagrant_${version}_x86_64.rpm 
+	_pkgremove vagrant 
+	
+	case  $OSNAME  in
+      Fedora)       
+          _fedora_itvagrant  $version
+          ;;
+      Ubuntu)
+          _ubuntu_itvagrant  $version
+          ;;           
+      *)              
+    esac
 
 	_itvagrant_fix plugin
 	_itvagrant_fix box		
@@ -816,7 +929,7 @@ function itvagrant {
 ##virtualenvwrapper
 function itenv {
   pip install virtualenvwrapper
-  export WORKON_HOME=$MAX_HOME/Envs
+  export WORKON_HOME=$HOME/Envs
   mkdir -p $WORKON_HOME
   source /usr/local/bin/virtualenvwrapper.sh	
   mkvirtualenv env1
@@ -842,8 +955,8 @@ function itpython {
 	   return 0
   fi
 	
-  git clone https://github.com/yyuu/pyenv.git $MAX_HOME/.pyenv	
-  git clone https://github.com/yyuu/pyenv-virtualenv.git $MAX_HOME/.pyenv/plugins/pyenv-virtualenv
+  git clone https://github.com/yyuu/pyenv.git $HOME/.pyenv	
+  git clone https://github.com/yyuu/pyenv-virtualenv.git $HOME/.pyenv/plugins/pyenv-virtualenv
   ldpyenv
   if [ ! -z "$1" ]; then
     for ver in "$@"
@@ -854,63 +967,26 @@ function itpython {
 }
 
 function itfileserver {
-	#/etc/exports
-	#/ubuntu  *(ro,sync,no_root_squash)
-    #/home    *(rw,sync,no_root_squash)
-    #client (dnf -y install nfs-utils)
-    #vi /etc/idmapd.conf
-    # line 5: uncomment and change to your domain name
-    #Domain = srv.world
-    #systemctl start(enable) rpcbind 
-    #mount -t nfs dlp.srv.world:/home /home 
-    # /etc/fstab
-    # dlp.srv.world:/home /home     nfs     defaults        0 0
-    
-    supass dnf -y install nfs-utils
-     vi /etc/idmapd.conf
-     Domain = srv.world
-	supass systemctl start rpcbind nfs-server 
-	supass systemctl enable rpcbind nfs-server 
-	supass  firewall-cmd --add-service=nfs --permanent 
-	supass firewall-cmd --reload 
-	
-	supass dnf -y install samba samba-client
-	supass  mkdir /home/share
-	supass  chmod 777 /home/share
-	supass augtool <<-EOF
-set "/files/etc/samba/smb.conf/target[*][.='global']/unix charset" UTF-8
-set /files/etc/samba/smb.conf/target[*][.="global"]/workgroup maxkerrer
-set "/files/etc/samba/smb.conf/target[*][.='global']/map to guest" = Bad User
-set "/files/etc/samba/smb.conf/target[*][.='global']/hosts allow" 127.10.0.0.
-set /files/etc/samba/smb.conf/target[301] share
-set /files/etc/samba/smb.conf/target[301]/comment "Ubuntu File Server Share"
-set /files/etc/samba/smb.conf/target[301]/path    /srv/samba/share
-set /files/etc/samba/smb.conf/target[301]/browsable  yes
-set "/files/etc/samba/smb.conf/target[301]/guest ok"  yes
-set "/files/etc/samba/smb.conf/target[301]/read only"  no
-set "/files/etc/samba/smb.conf/target[301]/create mask" 0755
-save
-quit
-EOF
-    supass systemctl start smb nmb 
-    supass  systemctl enable smb nmb 
-    supass  firewall-cmd --add-service=samba --permanent 
-    supass  firewall-cmd --reload 
-    
-    #selunux on
-    supass  setsebool -P samba_enable_home_dirs on
-    supass restorecon -R /home/share 
+    case  $OSNAME  in
+      Fedora)       
+          _fedora_itfileserver
+          ;;
+      Ubuntu)
+          _ubuntu_itfileserver
+          ;;           
+      *)              
+    esac
 }
 
-### ssh config and ssh for github ( $MAX_HOME/.ssh)
+### ssh config and ssh for github ( $HOME/.ssh)
 
-### stormpath maxkerrer@live.com 1tw ($MAX_HOME/.stormpath)
+### stormpath maxkerrer@live.com 1tw ($HOME/.stormpath)
 
-###/etc/host , /etc/fstab, $MAX_HOME/.zshrc  /etc/pip.conf 
+###/etc/host , /etc/fstab, $HOME/.zshrc  /etc/pip.conf 
 
 ### backup .vagrant.d/   /var/lib/docker
 
-### $MAX_HOME/.m2/setting 
+### $HOME/.m2/setting 
 
 ####clitools for https://github.com/webdevops
 
@@ -918,7 +994,7 @@ EOF
 ###travis for travis-ci.com
 
 
-### $MAX_HOME/.stormpath/apiKey.properties for https://api.stormpath.com  salty-squall:mk@live:1t9
+### $HOME/.stormpath/apiKey.properties for https://api.stormpath.com  salty-squall:mk@live:1t9
 
 
 ##mulesoft maxkerrer 1tWS
@@ -928,16 +1004,16 @@ EOF
 
 ########################################################################
 ldsdk () {
-  export SDKMAN_DIR="$MAX_HOME/.sdkman"
-  [[ -s "$MAX_HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$MAX_HOME/.sdkman/bin/sdkman-init.sh" 
+  export SDKMAN_DIR="$HOME/.sdkman"
+  [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh" 
 }
 
 ldgvm () {
-  [[ -s "$MAX_HOME/.gvm/scripts/gvm" ]] && source "$MAX_HOME/.gvm/scripts/gvm"
+  [[ -s "$HOME/.gvm/scripts/gvm" ]] && source "$HOME/.gvm/scripts/gvm"
 }
 
 ldnvm () {
-  export NVM_DIR="$MAX_HOME/.nvm"
+  export NVM_DIR="$HOME/.nvm"
   [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
 }
 
@@ -947,11 +1023,11 @@ ldjenv () {
 }
 
 ldperlbrew () {
-   source $MAX_HOME/perl5/perlbrew/etc/bashrc
+   source $HOME/perl5/perlbrew/etc/bashrc
 }
 
 ldrakudobrew () {
-   export PATH=$MAX_HOME/.rakudobrew/bin:$PATH
+   export PATH=$HOME/.rakudobrew/bin:$PATH
    rakudobrew init 
 }
 
@@ -968,7 +1044,7 @@ ldrvm () {
 }
 
 ldenvwrap() {
-   export WORKON_HOME=$MAX_HOME/Envs
+   export WORKON_HOME=$HOME/Envs
    source /usr/bin/virtualenvwrapper.sh
 }
 
@@ -1045,26 +1121,53 @@ function ldimages {
 }
 
 
+function _pkgext {
+	case  $OSNAME  in
+      Fedora)       
+          echo "rpm"
+          ;;
+      Ubuntu)
+          echo "deb"
+          ;;           
+      *)              
+    esac
+}
 
+function _pkgremove {
+	pkg=$1
+	case  $OSNAME  in
+      Fedora)       
+          rpm -qa | grep -qw $pkg  && supass dnf remove -y $pkg
+          ;;
+      Ubuntu)
+          dpkg -l | grep -qw $pkg && supass apt-get autoremove -y $pkg
+          ;;           
+      *)              
+    esac
+}
 
 ########################################################################
 ########################################################################
 #test
 ittestperl(){
-  ${MAX_HOME}/.max/perltest.pl sdfafafa asdfasfas  || echo failure	
-  
-
+  ${HOME}/.max/perltest.pl sdfafafa asdfasfas  || echo failure
 }
 
 ittestpython(){
 	/job/shell/test.py sdfafafa asdfasfas  || echo failure	
 }
 
-ldtest(){
-   if read -t 3 -q "name?please enter your name:"  ; then 
-     echo -n "hello $name ,welcome to my script"
-   else
-     echo $name
-     echo "sorry,too slow"
-   fi
+ittestruby(){
+
 }
+
+ittestgo(){
+
+}
+
+ittestscala(){
+
+}
+
+
+
