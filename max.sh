@@ -215,14 +215,37 @@ function itmirrors {
     cp $MAX_SHELL/pip.conf $HOME/.pip/
     
     #cpan
-    #  perl -MCPAN -e shell
+    # perl -MCPAN -e shell
     # o conf  urllist unshift http://mirrors.aliyun.com/CPAN/
     # o conf commit
-    mkdir -p $HOME/.cpan/CPAN/
-    cp $MAX_SHELL/MyConfig.pm $HOME/.cpan/CPAN/MyConfig.pm
+    case  $OSNAME  in
+      Fedora)       
+          mkdir -p /root/.local/share/.cpan/CPAN/
+          cp $MAX_SHELL/MyConfig.pm /root/.local/share/.cpan/CPAN/MyConfig.pm
+          ;;
+      Ubuntu)
+          mkdir -p $HOME/.cpan/CPAN/
+          cp $MAX_SHELL/MyConfig.pm $HOME/.cpan/CPAN/MyConfig.pm
+          ;;           
+      *)              
+    esac    
+    
+    supass   perl -MCPAN -e 'install App::cpanminus'
+    supass   cpanm  Capture::Tiny Git::Hooks
+    supass   cpanm Dancer2  Catalyst::Devel Mojolicious
+  
 
     #gem
-    
+    ldrbenv
+    gem sources --add https://gems.ruby-china.org/ --remove https://rubygems.org/
+    #bundle config mirror.https://rubygems.org https://gems.ruby-china.org	
+    #Gemfile 
+    #source 'https://rubygems.org/'
+    gem sources -l
+    gem install foreman --no-document
+    gem install puppet  --no-document
+    gem install r10k	
+   
     #maven
     #<mirrors>
     #<mirror>
@@ -492,15 +515,6 @@ function itchrome {
 }
 
 #jenv for java (http://www.jenv.be/)
-
-function _fix_gem {
-   ldrbenv
-   gem install foreman --no-document
-   gem install puppet  --no-document
-   gem install r10k
-	
-}
-
 
 #rbenv for ruby rails puppet
 function itrbenv {
