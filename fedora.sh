@@ -793,6 +793,8 @@ function _itdocker_box {
      drone
      
      portainer
+     
+     gitlab
 }
 #virtualbox vagrant and pull vagrant boxes
 
