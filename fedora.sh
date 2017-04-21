@@ -32,7 +32,7 @@ export CLASSPATH="${CLASSPATH}:$SDK_HOME/libs"
 LOGINPASSWD="mmmm"
 LOG_FILE="$MAX_HOME/install_log"
 
-
+OSNAME=`python -c "import platform;print(platform.linux_distribution()[0])"`
 alias supass="echo $LOGINPASSWD | sudo -S "
 echo progress-bar >> $MAX_HOME/.curlrc
 
@@ -196,7 +196,12 @@ function itmirrors {
     sudo pip install -i http://pypi.douban.com/simple/ saltTesting
     
     #cpan
-    
+    #  perl -MCPAN -e shell
+    # o conf  urllist unshift http://mirrors.aliyun.com/CPAN/
+    # o conf commit
+    mkdir -p $HOME/.cpan/CPAN/
+    cp $HOME/MyConfig.pm $HOME/.cpan/CPAN/MyConfig.pm
+
     #gem
     
     #maven
