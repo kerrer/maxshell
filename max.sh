@@ -5,23 +5,14 @@ MAX_SHELL="/work/max"
 SDK_HOME=$HOME/sdk
 
 export JAVA_HOME=/usr/java/latest
-
-export MAVEN_HOME=$SDK_HOME/apache-maven-3.5.0
-
-
-export GROOVY_HOME=$SDK_HOME/groovy-2.5.0-alpha-1
-export SCALA_HOME=$SDK_HOME/scala-2.12
-export GOROOT=$SDK_HOME/go1.8.1.linux-amd64/go
-export ACTIVATOR_HOME=$SDK_HOME/activator-1.3.12-minimal
-export GRADLE_HOME=$SDK_HOME/gradle-3.5
-
-export PATH=$PATH:$JAVA_HOME/bin:$MAVEN_HOME/bin:$GROOVY_HOME/bin:$SCALA_HOME/bin:$GOROOT/bin:$ACTIVATOR_HOME/bin:$GRADLE_HOME/bin
+export PATH=$PATH:$JAVA_HOME/bin:
 export CLASSPATH="${CLASSPATH}:$SDK_HOME/libs"
 LOGINPASSWD="mmmm"
 LOG_FILE="$HOME/install_log"
 
 OSNAME=`python -c "import platform;print(platform.linux_distribution()[0])"`
 alias supass="echo $LOGINPASSWD | sudo -S "
+alias supath='sudo env "PATH=$PATH" '
 echo progress-bar >> $HOME/.curlrc
 
 ########################################################################
@@ -209,8 +200,8 @@ function itmirrors {
     
     
     #pip
-    #sudo easy_install -i http://pypi.douban.com/simple/ saltTesting 
-    #sudo pip install -i http://pypi.douban.com/simple/ saltTesting
+    #sudo easy_install -i http://pypi.douban.com/simple/ --trusted-host pypi.douban.com saltTesting 
+    #sudo pip install -i http://pypi.douban.com/simple/ --trusted-host pypi.douban.com saltTesting
     mkdir -p $HOME/.pip
     cp $MAX_SHELL/pip.conf $HOME/.pip/
     
@@ -475,6 +466,10 @@ function itbin {
     
     wget https://github.com/containers/build/releases/download/v0.4.0/acbuild-v0.4.0.tar.gz -O  /tmp/acbuild-v0.4.0.tar.gz
     cd /tmp && tar xvzf acbuild-v0.4.0.tar.gz 
+
+    curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl > $HOME/bin/kubectl 
+    chmod +x $HOME/bin/kubectl 
+
     
 
 }
@@ -1006,6 +1001,17 @@ function itfileserver {
 #cas /etc/cas
 
 ########################################################################
+function ldmaxsdk {
+   export MAVEN_HOME=$SDK_HOME/apache-maven-3.5.0
+   export GROOVY_HOME=$SDK_HOME/groovy-2.5.0-alpha-1
+   export SCALA_HOME=$SDK_HOME/scala-2.12 
+   export GOROOT=$SDK_HOME/go1.8.1.linux-amd64/go
+   export ACTIVATOR_HOME=$SDK_HOME/activator-1.3.12-minimal
+   export GRADLE_HOME=$SDK_HOME/gradle-3.5
+   export PATH=$PATH:$MAVEN_HOME/bin:$GROOVY_HOME/bin:$SCALA_HOME/bin:$GOROOT/bin:$ACTIVATOR_HOME/bin:$GRADLE_HOME/bin
+}
+
+
 ldsdk () {
   export SDKMAN_DIR="$HOME/.sdkman"
   [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh" 
