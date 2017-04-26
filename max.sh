@@ -257,6 +257,16 @@ function itmirrors {
     # </mirrors>
 }
 
+function itansible {
+   supass dnf install -y 	redhat-rpm-confi   python-devel
+   sudo pip install -i http://pypi.douban.com/simple/  --trusted-host pypi.douban.com ansible
+   
+   ip=$( ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | grep 192.168.0 )
+   supass midir /etc/ansible
+   echo $ip | sudo tee /etc/ansible/hosts
+   
+   echo "[defaults]\nhost_key_checking = False" | sudo tee /etc/ansible/ansible.cfg
+}
 
 function itwork {
     #You must change all disk label name firstly!
@@ -467,6 +477,8 @@ function itbin {
     wget https://releases.hashicorp.com/packer/0.12.2/packer_0.12.2_linux_amd64.zip -O /tmp/packer_0.12.2_linux_amd64.zip
     cd  /tmp && unzip packer_0.12.2_linux_amd64.zip && mv packer $HOME/bin/
     chmod +x  $HOME/bin/packer
+    
+    terraform
     
     wget http://www.rarlab.com/rar/rarlinux-5.4.0.tar.gz -O /tmp/rarlinux-5.4.0.tar.gz
     cd /tmp && tar xvzf rarlinux-5.4.0.tar.gz  && mv rar $HOME/bin/    
@@ -726,6 +738,37 @@ function _itdocker_fix {
 	fi	
 }
 
+function docker_configure {
+	 ori_pwd=${PWD}
+	 ip=$( ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1  -d'/' )
+	 echo "Yuu must use hostname for this: $HOSTNAME $ip"
+	 echo "Create server key"
+	 
+     openssl genrsa -aes256 -out ca-key.pem 4096
+     openssl genrsa -aes256 -out ca-key.pem 4096
+     openssl req -new -x509 -days 365 -key ca-key.pem -sha256 -out ca.pem
+     openssl genrsa -out server-key.pem 4096
+     penssl req -subj "/CN=$HOSTNAME" -sha256 -new -key server-key.pem -out server.csr
+     echo subjectAltName = DNS:$HOSTNAME,IP:$ip,IP:127.0.0.1 > extfile.cnf
+      openssl x509 -req -days 365 -sha256 -in server.csr -CA ca.pem -CAkey ca-key.pem  -CAcreateserial -out server-cert.pem -extfile extfile.cnf
+     echo "create a client key"
+     openssl genrsa -out key.pem 4096
+     openssl req -subj '/CN=client' -new -key key.pem -out client.csr
+     echo  extendedKeyUsage = clientAuth > extfile.cnf
+     openssl x509 -req -days 365 -sha256 -in client.csr -CA ca.pem -CAkey ca-key.pem  -CAcreateserial -out cert.pem -extfile extfile.cnf
+     
+     sudo cp $MAX_SHELL/daemon.json /etc/docker/daemon.json
+     #change /usr/lib/systemd/system/docker.service
+     #ExecStart=/usr/bin/dockerd  -H=unix:///var/run/docker.sock -H=tcp://0.0.0.0:2376
+     sudo systemctl daemon-reload
+     sudo systemctl restart docker
+     sudo systemctl status docker
+     
+     client:
+     mkdir -pv ~/.docker
+     cp -v {ca,cert,key}.pem ~/.docker
+     export DOCKER_HOST=tcp://$HOST:2376 DOCKER_TLS_VERIFY=1
+}
 
 #itdocker or itdocker fix [first|all]
 function itdocker { 
