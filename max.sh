@@ -199,16 +199,7 @@ function itmirrors {
     
     
     
-    #pip
-    #sudo easy_install -i http://pypi.douban.com/simple/ --trusted-host pypi.douban.com saltTesting 
-    #sudo pip install -i http://pypi.douban.com/simple/ --trusted-host pypi.douban.com saltTesting
-    mkdir -p $HOME/.pip
-    cp $MAX_SHELL/python/pip.conf $HOME/.pip/
-    pip install Flask
-    pip install Django
-    pip install honcho
-    pip install ipython
-    #plone odoo
+    #pip [see itpython pip]
     
     #cpan
     # perl -MCPAN -e shell
@@ -991,34 +982,26 @@ function itvagrant {
 }
 
 
-function _itpython_fix {
-   if ! type nano  > /dev/null; then
+function _itpip {
+   if ! type pip  > /dev/null; then
       echo "Can not find pip"
       wget https://bootstrap.pypa.io/get-pip.py -O /tmp/get-pip.py
-   fi
+      supass   python /tmp/get-pip.py
+   fi  
    
-   supass   python /tmp/get-pip.py
-   supass   pip install Django==1.10.5	
-   supass   pip install Flask
+   #sudo easy_install -i http://pypi.douban.com/simple/ --trusted-host pypi.douban.com saltTesting 
+   #sudo pip install -i http://pypi.douban.com/simple/ --trusted-host pypi.douban.com saltTesting
+   mkdir -p $HOME/.pip
+   cp $MAX_SHELL/python/pip.conf $HOME/.pip/
+    pip install Flask
+    pip install Django
+    pip install honcho
+    pip install ipython
+    #plone odoo
 }
 
-
-##pyenv https://github.com/yyuu/pyenv, pyenv-virtualenv https://github.com/yyuu/pyenv-virtualenv
-function itpython {
-  if [ ! -z "$1" ] && [[ "$1" = "fix" ]]; then
-	   echo "You had choosed to fix python  candidates"
-	   _itpython_fix
-	   return 0
-  fi
-  
-  ##virtualenvwrapper
-  pip install virtualenvwrapper
-  export WORKON_HOME=$HOME/PYEnvs
-  mkdir -p $WORKON_HOME
-  source /usr/local/bin/virtualenvwrapper.sh	
-  mkvirtualenv env1
-  
-  #pyenv
+function _itpyenv {
+	#pyenv
   git clone https://github.com/yyuu/pyenv.git $HOME/.pyenv	
   git clone https://github.com/yyuu/pyenv-virtualenv.git $HOME/.pyenv/plugins/pyenv-virtualenv
   ldpyenv
@@ -1028,8 +1011,34 @@ function itpython {
         pyenv install $ver
     done
   fi
-  
-  
+}
+
+function _itpyvirtualenv {
+  ##virtualenvwrapper
+  pip install virtualenvwrapper
+  export WORKON_HOME=$HOME/PYEnvs
+  mkdir -p $WORKON_HOME
+  source /usr/local/bin/virtualenvwrapper.sh	
+  mkvirtualenv env1
+}
+
+##pyenv https://github.com/yyuu/pyenv, pyenv-virtualenv https://github.com/yyuu/pyenv-virtualenv
+function itpython {
+  if [ ! -z "$1" ] 
+  then
+	 case  $1  in
+        pip)       
+          _itpip
+          ;;
+        pyenv)
+          _itpyenv
+          ;;  
+        virt)
+          _itpyvirtualenv
+          ;;          
+      *)              
+     esac
+  fi 
 
 }
 
