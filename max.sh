@@ -203,7 +203,12 @@ function itmirrors {
     #sudo easy_install -i http://pypi.douban.com/simple/ --trusted-host pypi.douban.com saltTesting 
     #sudo pip install -i http://pypi.douban.com/simple/ --trusted-host pypi.douban.com saltTesting
     mkdir -p $HOME/.pip
-    cp $MAX_SHELL/pip.conf $HOME/.pip/
+    cp $MAX_SHELL/python/pip.conf $HOME/.pip/
+    pip install Flask
+    pip install Django
+    pip install honcho
+    pip install ipython
+    #plone odoo
     
     #cpan
     # perl -MCPAN -e shell
@@ -224,6 +229,7 @@ function itmirrors {
     supass   perl -MCPAN -e 'install App::cpanminus'
     cpanm  Capture::Tiny Git::Hooks Path::Class
     cpanm Dancer2  Catalyst::Devel Mojolicious
+    cpanm Parallel::Prefork
   
 
     #gem
@@ -233,9 +239,10 @@ function itmirrors {
     #Gemfile 
     #source 'https://rubygems.org/'
     gem sources -l
+    gem install rails   --no-document
     gem install foreman --no-document
     gem install puppet  --no-document
-    gem install r10k	
+    gem install r10k	--no-document
    
     #maven
     #<mirrors>
@@ -246,6 +253,12 @@ function itmirrors {
     #  <mirrorOf>central</mirrorOf>        
     #</mirror>
     # </mirrors>
+    
+    
+    #npm 
+    npm install -g cnpm --registry=https://registry.npm.taobao.org
+    #alias cnpm="npm --registry=https://registry.npm.taobao.org  --cache=$HOME/.npm/.cache/cnpm --disturl=https://npm.taobao.org/dist --userconfig=$HOME/.cnpmrc"
+    cnpm install -g foreman
 }
 
 function itansible {
@@ -483,6 +496,13 @@ function itbin {
     chmod +x $HOME/bin/kubectl 
 
     
+    mattn/goreman
+    ddollar/foreman
+    
+    curl https://github.com/chrismytton/shoreman/raw/master/shoreman.sh -sLo ~/bin/shoreman && \
+    chmod 755 ~/bin/shoreman
+    
+    tianon/gosu
 
 }
 
@@ -759,7 +779,7 @@ function docker_configure {
      sudo systemctl restart docker
      sudo systemctl status docker
      
-     client:
+     #client:
      mkdir -pv ~/.docker
      cp -v {ca,cert,key}.pem ~/.docker
      export DOCKER_HOST=tcp://$HOST:2376 DOCKER_TLS_VERIFY=1
@@ -837,21 +857,26 @@ function _itdocker_box {
     supass docker run -d  --name jenkins -p 3131:8080 -p 50000:50000 \
          -v /job/cache/jenkins/home:/var/jenkins_home \
          jenkins
-     sonarqube
+      
+      #aria2c --enable-rpc --rpc-listen-all
+      #http://localhost:9100   
+    docker run -d --name="aria2" -v /job/cache/aria2:/data -p 6800:6800 -p 9100:8080  max/webui-aria2
+
+    #sonarqube
      
-     redmine
+    #redmine
      
-     mysql
+    #mysql
      
-     postsql
+    #postsql
      
-     mariadb
+    #mariadb
      
-     drone
+    #drone
      
-     portainer
+    #portainer
      
-     gitlab
+    #gitlab
 }
 #virtualbox vagrant and pull vagrant boxes
 
@@ -966,16 +991,6 @@ function itvagrant {
 }
 
 
-
-##virtualenvwrapper
-function itenv {
-  pip install virtualenvwrapper
-  export WORKON_HOME=$HOME/Envs
-  mkdir -p $WORKON_HOME
-  source /usr/local/bin/virtualenvwrapper.sh	
-  mkvirtualenv env1
-}
-
 function _itpython_fix {
    if ! type nano  > /dev/null; then
       echo "Can not find pip"
@@ -995,7 +1010,15 @@ function itpython {
 	   _itpython_fix
 	   return 0
   fi
-	
+  
+  ##virtualenvwrapper
+  pip install virtualenvwrapper
+  export WORKON_HOME=$HOME/PYEnvs
+  mkdir -p $WORKON_HOME
+  source /usr/local/bin/virtualenvwrapper.sh	
+  mkvirtualenv env1
+  
+  #pyenv
   git clone https://github.com/yyuu/pyenv.git $HOME/.pyenv	
   git clone https://github.com/yyuu/pyenv-virtualenv.git $HOME/.pyenv/plugins/pyenv-virtualenv
   ldpyenv
@@ -1005,6 +1028,9 @@ function itpython {
         pyenv install $ver
     done
   fi
+  
+  
+
 }
 
 function itfileserver {
@@ -1047,11 +1073,16 @@ function itfileserver {
 function ldmaxsdk {
    export MAVEN_HOME=$SDK_HOME/apache-maven-3.5.0
    export GROOVY_HOME=$SDK_HOME/groovy-2.5.0-alpha-1
-   export SCALA_HOME=$SDK_HOME/scala-2.12 
+   export SCALA_HOME=$SDK_HOME/scala-2.12.2 
    export GOROOT=$SDK_HOME/go1.8.1.linux-amd64/go
    export ACTIVATOR_HOME=$SDK_HOME/activator-1.3.12-minimal
    export GRADLE_HOME=$SDK_HOME/gradle-3.5
-   export PATH=$PATH:$MAVEN_HOME/bin:$GROOVY_HOME/bin:$SCALA_HOME/bin:$GOROOT/bin:$ACTIVATOR_HOME/bin:$GRADLE_HOME/bin
+   export POSTMAN_HOME=$SDK_HOME/Postman
+   export ROO_HOME=$SDK_HOME/spring-roo-2.0.0.RC1
+   export FORGE_HOME=$SDK_HOME/forge-distribution-3.6.1.Final
+   export SBT_HOME=$SDK_HOME/sbt
+   export GRAILS_HOME=$SDK_HOME/grails-3.2.9
+   export PATH=$PATH:$MAVEN_HOME/bin:$GROOVY_HOME/bin:$SCALA_HOME/bin:$GOROOT/bin:$ACTIVATOR_HOME/bin:$GRADLE_HOME/bin:$SBT_HOME/bin:$GRAILS_HOME/bin:$POSTMAN_HOME:$ROO_HOME/bin:$FORGE_HOME/bin
 }
 
 
@@ -1099,7 +1130,7 @@ ldrvm () {
    #rvm list known
 }
 
-ldenvwrap() {
+ldpyvirtual() {
    export WORKON_HOME=$HOME/Envs
    source /usr/bin/virtualenvwrapper.sh
 }

@@ -2,7 +2,7 @@
 
 #Fedora:
 function _fedora_devpkg {
-	supass  dnf install -y nano git geany thunderbird  zsh fish curl aria2 p7zip augeas augeas-devel subversion mercurial expect dnf-plugins-core util-linux-user
+	supass  dnf install -y nano git geany thunderbird  zsh fish curl aria2 p7zip augeas augeas-devel subversion mercurial expect dnf-plugins-core util-linux-user uget
 	supass  dnf install -y make automake gcc gcc-c++ kernel-devel  
 	#groupinstall "Development Tools" "Development Libraries"
 }
