@@ -165,4 +165,8 @@ EOF
     #selunux on
     supass  setsebool -P samba_enable_home_dirs on
     supass restorecon -R /home/share 
+    
+    #mount from windows 
+    #smbclient -L <windows-box> -U <username>
+    #sudo mount -t cifs  -o username=anfa,password=123456,rw,nounix,iocharset=utf8,file_mode=0777,dir_mode=0777  //192.168.1.29/share /work/windows
 }
