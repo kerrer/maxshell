@@ -1,10 +1,11 @@
 #!/usr/bin/bash
 
 echo "Hello World!"
-MAX_SHELL="/work/max"
+MAX_SHELL="$HOME/max"
 SDK_HOME=$HOME/sdk
 
 export JAVA_HOME=/usr/java/latest
+#export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk
 export PATH=$PATH:$JAVA_HOME/bin:
 export CLASSPATH="${CLASSPATH}:$SDK_HOME/libs"
 LOGINPASSWD="mmmm"
@@ -144,6 +145,22 @@ END_HEREDOC
 . $(dirname $0)/ubuntu.sh
 . $(dirname $0)/fedora.sh
 
+function init {
+	alias supass="echo $LOGINPASSWD | sudo -S "
+    alias supath='sudo env "PATH=$PATH" '
+    
+    alias cttfc="cd /work/ttfc"
+    alias cproject="cd /work/project"
+    echo progress-bar >> $HOME/.curlrc
+    
+    
+}
+
+function setAll {
+	### $HOME/.m2/setting 
+    cp $MAX_SHELL/maven/m2/settings.xml $HOME/.m2/
+}
+
 function itpkgs {
    case  $OSNAME  in
       Fedora)       
@@ -235,15 +252,6 @@ function itmirrors {
     gem install puppet  --no-document
     gem install r10k	--no-document
    
-    #maven
-    #<mirrors>
-    #<mirror>
-    #  <id>alimaven</id>
-    #  <name>aliyun maven</name>
-    #  <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
-    #  <mirrorOf>central</mirrorOf>        
-    #</mirror>
-    # </mirrors>
     
     
     #npm 
@@ -997,20 +1005,17 @@ function _itpip {
     pip install Django
     pip install honcho
     pip install ipython
+    #pyton Crawler 
+    pip install scrapy
     #plone odoo
 }
 
 function _itpyenv {
-	#pyenv
+  #pyenv
   git clone https://github.com/yyuu/pyenv.git $HOME/.pyenv	
   git clone https://github.com/yyuu/pyenv-virtualenv.git $HOME/.pyenv/plugins/pyenv-virtualenv
-  ldpyenv
-  if [ ! -z "$1" ]; then
-    for ver in "$@"
-    do
-        pyenv install $ver
-    done
-  fi
+  #ldpyenv
+  #pyenv install $ver
 }
 
 function _itpyvirtualenv {
@@ -1062,7 +1067,7 @@ function itfileserver {
 
 ### backup .vagrant.d/   /var/lib/docker
 
-### $HOME/.m2/setting 
+
 
 ####clitools for https://github.com/webdevops
 
@@ -1080,7 +1085,7 @@ function itfileserver {
 
 ########################################################################
 function ldmaxsdk {
-   export MAVEN_HOME=$SDK_HOME/apache-maven-3.5.0
+   export M2_HOME=$SDK_HOME/apache-maven-3.5.0
    export GROOVY_HOME=$SDK_HOME/groovy-2.5.0-alpha-1
    export SCALA_HOME=$SDK_HOME/scala-2.12.2 
    export GOROOT=$SDK_HOME/go1.8.1.linux-amd64/go
@@ -1091,7 +1096,9 @@ function ldmaxsdk {
    export FORGE_HOME=$SDK_HOME/forge-distribution-3.6.1.Final
    export SBT_HOME=$SDK_HOME/sbt
    export GRAILS_HOME=$SDK_HOME/grails-3.2.9
-   export PATH=$PATH:$MAVEN_HOME/bin:$GROOVY_HOME/bin:$SCALA_HOME/bin:$GOROOT/bin:$ACTIVATOR_HOME/bin:$GRADLE_HOME/bin:$SBT_HOME/bin:$GRAILS_HOME/bin:$POSTMAN_HOME:$ROO_HOME/bin:$FORGE_HOME/bin
+   export GNAT_HOME=/usr/gnat
+   export SPRING_BOOT_HOME=/home/max/sdk/spring-boot
+   export PATH=$PATH:$M2_HOME/bin:$GROOVY_HOME/bin:$SCALA_HOME/bin:$GOROOT/bin:$ACTIVATOR_HOME/bin:$GRADLE_HOME/bin:$SBT_HOME/bin:$GRAILS_HOME/bin:$POSTMAN_HOME:$ROO_HOME/bin:$FORGE_HOME/bin:$GNAT_HOME/bin:$SPRING_BOOT_HOME/bin
 }
 
 
@@ -1266,4 +1273,7 @@ ittestscala(){
 }
 
 
+####################
 
+
+init

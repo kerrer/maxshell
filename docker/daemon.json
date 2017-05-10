@@ -1,9 +1,9 @@
 {
     "tlsverify":true,
-    "tlscacert": "/work/max/ca/ca.pem",
-    "tlscert": "/work/max/ca/server-cert.pem",
-    "tlskey": "/work/max/ca/server-key.pem",
-    "host": ["unix:///var/run/docker.sock","tcp://0.0.0.0:2376"],
+    "tlscacert": "/etc/docker/key/ca.pem",
+    "tlscert": "/etc/docker/key/server-cert.pem",
+    "tlskey": "/etc/docker/key/server-key.pem",
+    "host": ["unix:///var/run/docker.sock","tcp://0.0.0.0:2376"]
     "registry-mirrors": ["proxy.tdocker.com"],
     "insecure-registries": ["proxy.tdocker.com:5000"]
 }

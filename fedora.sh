@@ -33,23 +33,23 @@ function _fedora_itjava  {
 
     if [ ! -f $jdk_file  ]
 	then
-          read jdk_url
+      read jdk_url
 	  echo get JDK: $jdk_url
 	  wget --header='Cookie: oraclelicense=accept-securebackup-cookie' $jdk_url -O $jdk_file
 	fi        
         
 	echo install Oracle JDK: jdk-$jdk_version-linux-x64.rpm
 	supass rpm -Uvh $jdk_file
-	supass alternatives --install /usr/bin/java java /usr/java/latest/jre/bin/java 200000
-	supass alternatives --install /usr/bin/javaws javaws /usr/java/latest/jre/bin/javaws 200000
-	supass alternatives --install /usr/lib64/mozilla/plugins/libjavaplugin.so libjavaplugin.so.x86_64 /usr/java/latest/jre/lib/amd64/libnpjp2.so 200000
-	supass alternatives --install /usr/bin/javac javac /usr/java/latest/bin/javac 200000
-	supass alternatives --install /usr/bin/jar jar /usr/java/latest/bin/jar 200000
+	sudo alternatives --install /usr/bin/java java /usr/java/latest/jre/bin/java 200000
+	sudo alternatives --install /usr/bin/javaws javaws /usr/java/latest/jre/bin/javaws 200000
+	sudo alternatives --install /usr/lib64/mozilla/plugins/libjavaplugin.so libjavaplugin.so.x86_64 /usr/java/latest/jre/lib/amd64/libnpjp2.so 200000
+	sudo alternatives --install /usr/bin/javac javac /usr/java/latest/bin/javac 200000
+	sudo alternatives --install /usr/bin/jar jar /usr/java/latest/bin/jar 200000
 
-    supass alternatives --config java
-    supass alternatives --config javaws
-    supass alternatives --config ibjavaplugin.so.x86_64    
-    supass alternatives --config javac  
+    sudo alternatives --config java
+    sudo alternatives --config javaws
+    sudo alternatives --config ibjavaplugin.so.x86_64    
+    sudo alternatives --config javac  
 }
  
 function _fedora_itchrome {
