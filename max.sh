@@ -716,9 +716,13 @@ function itlang {
    rpm -Uvh erlang-solutions-1.0-1.noarch.rpm
    sudo dnf install erlang elixir mongooseim
    
+   # elixir
+   
    #ring-lang
    
    #perl 6
+   
+   #powershell
 }
 
 #docker and pull docker images
@@ -948,14 +952,17 @@ function _itvagrant_fix {
 	
 	if [ "$1" = "plugin" ]; then
 	   echo "Installing plugins,Waitting........"
-	   cut -f 1 -d "(" $MAX_SHELL/vagrant-plugins | cat | while read VGPLUGIN; do
-         vagrant plugin list | grep $VGPLUGIN || vagrant plugin install $VGPLUGIN
-       done
+	   #cut -f 1 -d "(" $MAX_SHELL/vagrant-plugins | cat | while read VGPLUGIN; do
+       #  vagrant plugin list | grep $VGPLUGIN || vagrant plugin install $VGPLUGIN
+       #done
+       $MAX_SHELL/vagrant-plugin.py -f $MAX_SHELL/vagrant/vagrant-plugin -n 5
 	elif [ "$1" = "box" ]; then
 	   echo "Installing boxes,Waitting........"
-	   cut -f 1 -d "(" $MAX_SHELL/vagrant-boxes | cat | while read VGBOX; do
-           vagrant box list | grep $VGBOX || vagrant box add $VGBOX --provider virtualbox
-       done
+	   #cut -f 1 -d "(" $MAX_SHELL/vagrant-boxes | cat | while read VGBOX; do
+       #    vagrant box list | grep $VGBOX || vagrant box add $VGBOX --provider virtualbox
+       #done
+       
+       $MAX_SHELL/vagrant.pl -f $MAX_SHELL/vagrant/vagrant-boxes -n 5
 	fi
 }
 
@@ -1264,14 +1271,17 @@ ittestruby(){
 
 }
 
-ittestgo(){
-
+ittestgo(){  
+	go run test.go --flagname 123 -b false -v ok
 }
 
 ittestscala(){
 
 }
 
+ittestelixir(){
+
+}
 
 ####################
 
